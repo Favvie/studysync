@@ -110,7 +110,7 @@ const LoginModal = ({ isOpen, onClose }: TProps) => {
 									// disabled={isPending || !isConnected}
 									className="bg-white text-black w-full hover:text-white">
 									{/* {isPending ? <Spinner className="h-4 w-4" /> : "Submit"} */}
-									Sign Up
+									Sign in
 								</Button>
 							</form>
 						</Form>
