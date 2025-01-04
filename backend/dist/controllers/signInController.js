@@ -1,3 +1,3 @@
 export const signIn = (req, res) => {
-    res.json({ test: "true" });
+    console.log('Sign In Controller');
 };
