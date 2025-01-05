@@ -12,6 +12,30 @@ import { userModel } from '../models/userModel.js';
 import { compare } from 'bcrypt';
 import dotenv from 'dotenv';
 dotenv.config();
+/**
+ * Middleware for user authentication during sign-in process.
+ * Validates user credentials and generates access and refresh tokens.
+ *
+ * @param {Request} req - Express request object containing email and password in body
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ *
+ * @throws {Error} If environment variables are not set
+ * @throws {Error} If email or password is missing
+ * @throws {Error} If user is not found
+ * @throws {Error} If password doesn't match
+ *
+ * @returns Calls next() with customData containing:
+ *  - headers: Object with RefreshToken and CORS headers
+ *  - success: boolean indicating successful login
+ *  - message: success message
+ *  - token: JWT access token
+ *
+ * @example
+ * app.post('/signin', signInAuth, (req, res) => {
+ *   // Handle successful authentication
+ * });
+ */
 export const signInAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
@@ -36,16 +60,20 @@ export const signInAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             return;
         }
         // No roles implemented yet
-        const token = jwt.sign({ id: userFound._id }, privateKey, { expiresIn: '1h' });
-        const refreshToken = jwt.sign({ id: userFound._id }, refreshkey, { expiresIn: '7d' });
-        res.status(200)
-            .setHeader('RefreshToken', `Bearer ${refreshToken}`)
-            .setHeader('Access-Control-Expose-Headers', 'RefreshToken')
-            .json({
+        const payload = {
+            sub: userFound._id,
+        };
+        const token = jwt.sign(payload, privateKey, { expiresIn: '1h' });
+        const refreshToken = jwt.sign(payload, refreshkey, { expiresIn: '7d' });
+        req.customData = {
+            headers: {
+                RefreshToken: `Bearer ${refreshToken}`,
+                'Access-Control-Expose-Headers': 'RefreshToken'
+            },
             success: true,
             message: 'Login successful',
             token
-        });
+        };
         next();
     }
     catch (error) {

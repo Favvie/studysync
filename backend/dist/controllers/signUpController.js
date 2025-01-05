@@ -8,11 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { userModel } from '../models/userModel.js';
-import { hash } from 'bcrypt';
+import { hashPassword } from '../utils/hashPassword.js';
 export const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
-        const salt = 10;
         if (!email || !password) {
             res.status(400).json({ success: false, msg: "Email and password are required!" });
             return;
@@ -22,7 +21,7 @@ export const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             res.status(400).json({ success: false, msg: "Email is already used!" });
             return;
         }
-        const hashedPassword = yield hash(password, salt);
+        const hashedPassword = yield hashPassword(password);
         const newUser = new userModel({
             email,
             password: hashedPassword,

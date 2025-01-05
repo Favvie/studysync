@@ -5,3 +5,14 @@ export interface IUser extends Document {
     email: string;
     password: string;
 }
+
+export type Payload = {
+    sub: string,
+    role?: string
+}
+
+export type JWTPayload = {
+    sub: string,
+    iat?: number,
+    exp?: number
+}

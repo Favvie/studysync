@@ -4,4 +4,4 @@ const tokenSchema = new Schema({
     token: { type: String, required: true },
     createdAt: { type: Date, required: true, default: Date.now, expires: 43200 }
 });
-export const Token = model('Token', tokenSchema);
+export const tokenModel = model('Token', tokenSchema);

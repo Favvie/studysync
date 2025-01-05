@@ -7,19 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { userModel } from '../models/userModel.js';
-import { hashPassword } from '../utils/hashPassword.js';
-export const patchUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { password } = req.body;
-    if (password) {
-        const hashedPassword = yield hashPassword(password);
-        req.body.password = hashedPassword;
-    }
-    try {
-        const userUpdated = yield userModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.status(200).send(userUpdated);
-    }
-    catch (error) {
-        res.status(500).json({ success: false, msg: error instanceof Error ? error.message : error });
-    }
+import { hash } from 'bcrypt';
+export const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
+    const salt = 10;
+    return yield hash(password, salt);
 });
