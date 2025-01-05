@@ -1,8 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import userForm from "./router/userForm.js";
+import userRoutes from "./router/userRoutes.js";
 import morgan from "morgan";
+import refresh from "./router/refresh.js";
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 //router uses
-app.use('/api/auth/',[ userForm ]);
+app.use('/api/v1/', [ userRoutes, refresh ]);
 
 
 //connect to process.env.MONGO_URI:

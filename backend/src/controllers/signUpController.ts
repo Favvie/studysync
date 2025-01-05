@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { User } from '../models/User.js';
+import { userModel } from '../models/userModel.js';
 import {  hash  } from 'bcrypt';
 
 export const signUp = async (req: Request, res: Response) => {
@@ -10,18 +10,18 @@ export const signUp = async (req: Request, res: Response) => {
       res.status(400).json({success: false, msg: "Email and password are required!"});
       return;
     }
-    const emailIsPresent = await User.findOne({email});
+    const emailIsPresent = await userModel.findOne({email});
     if (emailIsPresent !== null) {
       res.status(400).json({success: false, msg: "Email is already used!"});
       return;
     }
     const hashedPassword = await hash(password, salt);
-    const user = new User({
+    const newUser = new userModel({
       email,
       password: hashedPassword,
     });
-    await user.save();
-    res.status(201).json(user);
+    await newUser.save();
+    res.status(201).json(newUser);
   } catch (error) {
     res.status(400).json({ success: true, error: error instanceof Error ? error.message : 'An error occurred' });
   }

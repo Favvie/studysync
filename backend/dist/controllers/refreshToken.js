@@ -9,43 +9,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import jwt from 'jsonwebtoken';
 import { userModel } from '../models/userModel.js';
-import { compare } from 'bcrypt';
 import dotenv from 'dotenv';
+import { Token } from '../models/token.js';
 dotenv.config();
-export const signInAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+export const refreshToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password } = req.body;
+        const refreshToken = req.header('RefreshToken');
         const privateKey = process.env.PRIVATE_KEY;
-        const refreshkey = process.env.PRIVATE_REFRESH_KEY;
-        if (!privateKey || !refreshkey) {
-            res.status(500).json({ success: false, error: 'Please check your environment variables' });
+        const privateRefreshKey = process.env.PRIVATE_REFRESH_KEY;
+        if (!refreshToken) {
+            res.status(401).json({ success: false, error: 'Access denied' });
             return;
         }
-        if (!email || !password) {
-            res.status(400).json({ success: false, error: 'Please provide email and password' });
-            return;
-        }
-        const userFound = yield userModel.findOne({ email });
+        const decoded = jwt.verify(refreshToken, privateRefreshKey);
+        const userFound = yield userModel.findById(decoded.id);
         if (userFound === null) {
             res.status(404).json({ success: false, error: 'userModel not found' });
             return;
         }
-        const isMatch = yield compare(password, userFound.password);
-        if (isMatch === false) {
-            res.status(401).json({ success: false, error: 'Invalid credentials' });
-            return;
-        }
         // No roles implemented yet
         const token = jwt.sign({ id: userFound._id }, privateKey, { expiresIn: '1h' });
-        const refreshToken = jwt.sign({ id: userFound._id }, refreshkey, { expiresIn: '7d' });
-        res.status(200)
-            .setHeader('RefreshToken', `Bearer ${refreshToken}`)
-            .setHeader('Access-Control-Expose-Headers', 'RefreshToken')
-            .json({
-            success: true,
-            message: 'Login successful',
-            token
-        });
+        const newRefreshToken = jwt.sign({ id: userFound._id }, privateRefreshKey, { expiresIn: '7d' });
+        yield Token.create({ userId: userFound._id, token: newRefreshToken });
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        }).json({ newAccessToken: token });
         next();
     }
     catch (error) {
