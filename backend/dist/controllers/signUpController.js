@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { User } from '../models/User.js';
+import { userModel } from '../models/userModel.js';
 import { hash } from 'bcrypt';
 export const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -17,18 +17,18 @@ export const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             res.status(400).json({ success: false, msg: "Email and password are required!" });
             return;
         }
-        const emailIsPresent = yield User.findOne({ email });
+        const emailIsPresent = yield userModel.findOne({ email });
         if (emailIsPresent !== null) {
             res.status(400).json({ success: false, msg: "Email is already used!" });
             return;
         }
         const hashedPassword = yield hash(password, salt);
-        const user = new User({
+        const newUser = new userModel({
             email,
             password: hashedPassword,
         });
-        yield user.save();
-        res.status(201).json(user);
+        yield newUser.save();
+        res.status(201).json(newUser);
     }
     catch (error) {
         res.status(400).json({ success: true, error: error instanceof Error ? error.message : 'An error occurred' });

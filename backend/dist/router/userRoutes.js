@@ -1,0 +1,16 @@
+import express from "express";
+import { signUp } from "../controllers/signUpController.js";
+import { signIn } from "../controllers/signInController.js";
+import { signInAuth } from "../middleware/signInAuth.js";
+import { getUserController } from '../controllers/getUserController.js';
+import { getUserByIdController } from '../controllers/getUserController.js';
+import { deleteUserController } from '../controllers/deleteUserController.js';
+import { patchUserController } from '../controllers/patchUserController.js';
+const router = express.Router();
+router.get('/users', getUserController);
+router.get('/users/:id', getUserByIdController);
+router.post("/signup", signUp);
+router.post("/signin", signInAuth, signIn);
+router.delete('/users/:id', deleteUserController);
+router.patch('/users/:id', patchUserController);
+export default router;

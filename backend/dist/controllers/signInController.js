@@ -1,3 +1,3 @@
 export const signIn = (req, res) => {
-    console.log('Sign In Controller');
+    console.log('Sign In');
 };
