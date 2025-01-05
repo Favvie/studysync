@@ -11,6 +11,13 @@ import { authorizationMiddleware } from "../middleware/auth.js";
 const router = express.Router();
 
 // Make sure your handler functions follow this type pattern:
+/**
+ * Represents a middleware function that handles HTTP requests in Express.js.
+ * @param {Request} req - The Express request object containing information about the HTTP request.
+ * @param {Response} res - The Express response object for sending responses to the client.
+ * @param {NextFunction} [next] - Optional callback function to pass control to the next middleware function.
+ * @returns {Promise<void> | void} - A Promise that resolves to void, or void if synchronous.
+ */
 type RequestHandler = (
   req: Request,
   res: Response,
