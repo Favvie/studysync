@@ -21,31 +21,30 @@ import { JWTPayload } from '../types/user';
  * - Environment variable PRIVATE_KEY for token verification
  * - Optional ID in request parameters or body for authorization matching
  * 
- * @returns {void}
+ * @returns
  */
 export const authorizationMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const requiredEnvVars = ['PRIVATE_KEY'];
+    for (const v of requiredEnvVars) {
+        if (!process.env[v]) {
+            return res.status(500).json({ error: `${v} not set in environment` });
+        }
+    }
+
     const authHeader = req.headers.authorization;
-    const privateKey = process.env.PRIVATE_KEY as string;
-    const idFromParam = req.params.id;
-    const idFromBody = req.body.id;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'No token provided' });
     }
 
     const tokenString = authHeader.split(' ')[1];
     try {
-        const decoded = jwt.verify(tokenString, privateKey) as JWTPayload;
-        if(!decoded) {
-            res.status(401).json({success: false, msg: "You are not Authorized!"});
-            return;
+        const decoded = jwt.verify(tokenString, process.env.PRIVATE_KEY as string) as JWTPayload;
+        if (!decoded) {
+            return res.status(401).json({ success: false, msg: 'You are not Authorized!' });
         }
-        const id = decoded.sub;
-        if ((id !== idFromParam) && (id !== idFromBody)) {
-            res.status(401).json({success: false, msg: "You are not Authorized!"});
-            return;
-        }
+        req.customData = { userId: decoded.sub };
         next();
     } catch (error) {
-        return res.status(401).json({success: false, msg: (error instanceof Error) ? error.message : 'An error occurred' });
+        return res.status(401).json({ success: false, msg: (error instanceof Error) ? error.message : 'An error occurred' });
     }
 }

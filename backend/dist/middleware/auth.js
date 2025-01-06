@@ -18,28 +18,26 @@ import jwt from 'jsonwebtoken'; //jwt exports default commonjs module, avoid nam
  * - Environment variable PRIVATE_KEY for token verification
  * - Optional ID in request parameters or body for authorization matching
  *
- * @returns {void}
+ * @returns
  */
 export const authorizationMiddleware = (req, res, next) => {
+    const requiredEnvVars = ['PRIVATE_KEY'];
+    for (const v of requiredEnvVars) {
+        if (!process.env[v]) {
+            return res.status(500).json({ error: `${v} not set in environment` });
+        }
+    }
     const authHeader = req.headers.authorization;
-    const privateKey = process.env.PRIVATE_KEY;
-    const idFromParam = req.params.id;
-    const idFromBody = req.body.id;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'No token provided' });
     }
     const tokenString = authHeader.split(' ')[1];
     try {
-        const decoded = jwt.verify(tokenString, privateKey);
+        const decoded = jwt.verify(tokenString, process.env.PRIVATE_KEY);
         if (!decoded) {
-            res.status(401).json({ success: false, msg: "You are not Authorized!" });
-            return;
+            return res.status(401).json({ success: false, msg: 'You are not Authorized!' });
         }
-        const id = decoded.sub;
-        if ((id !== idFromParam) && (id !== idFromBody)) {
-            res.status(401).json({ success: false, msg: "You are not Authorized!" });
-            return;
-        }
+        req.customData = { userId: decoded.sub };
         next();
     }
     catch (error) {

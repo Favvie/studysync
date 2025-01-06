@@ -13,7 +13,7 @@ app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(morgan("dev")); // HTTP request logger
 // Routes
-app.use('/api/v1/', userRoutes); // Mount user routes under /api/v1/
+app.use('/api/v1/', [userRoutes]); // Mount user routes under /api/v1/
 // Database connection
 const db = process.env.MONGODB_URI;
 mongoose.connect(db).then(() => {

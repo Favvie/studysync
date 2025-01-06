@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { userModel } from '../models/userModel.js';
 import { hashPassword } from '../utils/hashPassword.js';
-import { tokenModel } from '../models/token.js';
+import { tokenModel } from '../models/tokenModel.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();

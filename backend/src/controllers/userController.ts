@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { userModel } from '../models/userModel.js';
 import { hashPassword } from '../utils/hashPassword.js';
-import { tokenModel } from '../models/token.js';
+import { tokenModel } from '../models/tokenModel.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
