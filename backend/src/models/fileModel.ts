@@ -19,7 +19,7 @@ const fileMetaDataSchema = new mongoose.Schema({
   },
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "userModel",
+    ref: "User",
     required: true,
   }
 }, { timestamps: true });

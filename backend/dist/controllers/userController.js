@@ -71,9 +71,8 @@ export const signIn = (req, res) => {
  * Handle token refresh
  * @param req Request object containing refresh token in header
  * @param res Response object
- * @param next NextFunction
  */
-export const refreshToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+export const refreshToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.header('RefreshToken');
         const privateKey = process.env.PRIVATE_KEY;
@@ -101,7 +100,6 @@ export const refreshToken = (req, res, next) => __awaiter(void 0, void 0, void 0
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
         }).json({ newAccessToken: token });
-        next();
     }
     catch (error) {
         res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'An error occured' });

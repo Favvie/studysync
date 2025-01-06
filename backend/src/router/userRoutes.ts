@@ -24,19 +24,21 @@ type RequestHandler = (
   next?: NextFunction
 ) => Promise<void> | void;
 
-
-router.get('/users', authorizationMiddleware as RequestHandler, getUserController as RequestHandler);
-
-router.get('/users/:id', authorizationMiddleware as RequestHandler, getUserByIdController as RequestHandler);
-
+// Public route
 router.post("/signup", signUp as RequestHandler);
 
 router.post("/signin", signInAuth as RequestHandler, signIn as RequestHandler);
 
-router.delete('/users/:id', authorizationMiddleware as RequestHandler,deleteUserController as RequestHandler);
+router.get('/refresh', refreshToken as RequestHandler);
+//Authorization Middleware for protected routes
+router.use(authorizationMiddleware as RequestHandler);
 
-router.patch('/users/:id', authorizationMiddleware as RequestHandler,patchUserController as RequestHandler);
+router.get('/users', getUserController as RequestHandler);
 
-router.post('/refresh', authorizationMiddleware as RequestHandler, refreshToken as RequestHandler);
+router.get('/users/:id', getUserByIdController as RequestHandler);
+
+router.delete('/users/:id',deleteUserController as RequestHandler);
+
+router.patch('/users/:id',patchUserController as RequestHandler);
 
 export default router;

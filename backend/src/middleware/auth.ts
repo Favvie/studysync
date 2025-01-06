@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken'; //jwt exports default commonjs module, avoid named exports
+import jwt from 'jsonwebtoken'; // jwt exports a default CommonJS module, avoid named exports because they are not supported
 import { JWTPayload } from '../types/user';
 
 /**
@@ -21,30 +21,33 @@ import { JWTPayload } from '../types/user';
  * - Environment variable PRIVATE_KEY for token verification
  * - Optional ID in request parameters or body for authorization matching
  * 
- * @returns
+ * @returns {void} - Does not return a value but calls `next()` to pass control to the next middleware
  */
 export const authorizationMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const requiredEnvVars = ['PRIVATE_KEY'];
-    for (const v of requiredEnvVars) {
+    for (const v of ['PRIVATE_KEY']) {
         if (!process.env[v]) {
-            return res.status(500).json({ error: `${v} not set in environment` });
+            res.status(500).json({ error: `${v} not set in environment` });
+            return;
         }
     }
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'No token provided' });
+        res.status(401).json({ error: 'No token provided' });
+        return;
     }
 
     const tokenString = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(tokenString, process.env.PRIVATE_KEY as string) as JWTPayload;
         if (!decoded) {
-            return res.status(401).json({ success: false, msg: 'You are not Authorized!' });
+            res.status(401).json({ success: false, msg: 'You are not Authorized!' });
+            return;
         }
         req.customData = { userId: decoded.sub };
         next();
     } catch (error) {
-        return res.status(401).json({ success: false, msg: (error instanceof Error) ? error.message : 'An error occurred' });
+        res.status(401).json({ success: false, msg: (error instanceof Error) ? error.message : 'An error occurred' });
+        return;
     }
 }

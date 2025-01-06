@@ -9,11 +9,14 @@ import { patchUserController } from '../controllers/userController.js';
 import { refreshToken } from "../controllers/userController.js";
 import { authorizationMiddleware } from "../middleware/auth.js";
 const router = express.Router();
-router.get('/users', authorizationMiddleware, getUserController);
-router.get('/users/:id', authorizationMiddleware, getUserByIdController);
+// Public route
 router.post("/signup", signUp);
 router.post("/signin", signInAuth, signIn);
-router.delete('/users/:id', authorizationMiddleware, deleteUserController);
-router.patch('/users/:id', authorizationMiddleware, patchUserController);
-router.post('/refresh', authorizationMiddleware, refreshToken);
+router.get('/refresh', refreshToken);
+//Authorization Middleware for protected routes
+router.use(authorizationMiddleware);
+router.get('/users', getUserController);
+router.get('/users/:id', getUserByIdController);
+router.delete('/users/:id', deleteUserController);
+router.patch('/users/:id', patchUserController);
 export default router;

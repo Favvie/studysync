@@ -1,5 +1,5 @@
 // Import necessary dependencies from express and other modules
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { userModel } from '../models/userModel.js';
 import { hashPassword } from '../utils/hashPassword.js';
 import { tokenModel } from '../models/tokenModel.js';
@@ -65,9 +65,8 @@ export const signIn = (req: Request, res: Response) => {
  * Handle token refresh
  * @param req Request object containing refresh token in header
  * @param res Response object
- * @param next NextFunction
  */
-export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+export const refreshToken = async (req: Request, res: Response) => {
     try {
         const refreshToken = req.header('RefreshToken');
         const privateKey = process.env.PRIVATE_KEY as string;
@@ -101,7 +100,6 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
             maxAge: 7 * 24 * 60 * 60 * 1000
         }).json({ newAccessToken: token });
 
-        next();
     } catch (error) {
         res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'An error occured' })
     }
