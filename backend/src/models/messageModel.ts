@@ -6,11 +6,16 @@ const messageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  user: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-});
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group',
+    required: true,
+  },
+}, {  timestamps: true });
 
 export const messageModel = mongoose.model<IMessage>('Message', messageSchema);

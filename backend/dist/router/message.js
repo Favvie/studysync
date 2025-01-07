@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getMessage, postMessage } from '../controllers/messageController.js';
+import { getMessages, postMessages } from '../controllers/messageController.js';
 const router = Router();
-router.get('/', getMessage);
-router.post('/', postMessage);
+router.get('/', getMessages);
+router.post('/', postMessages);
 export default router;

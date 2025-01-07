@@ -1,20 +1,24 @@
 import { Request, Response } from 'express';
 import { messageModel } from '../models/messageModel.js';
 
-export const getMessage = async (req: Request, res: Response) => {
+export const getMessages = async (req: Request, res: Response) => {
   try {
-    const userId = await messageModel.findById(req.params.user);
-    const messages = await messageModel.findById({_id: userId});
+    const groupId = req.query.groupId;
+    const messages = (await messageModel.find({groupId}));
+    if (messages === null) {
+      res.status(404).json({ success: false, message: 'No messages found!' });
+      return;
+    }
     res.status(200).json(messages);
   } catch (error) {
     res.status(500).json({ success: false, message: error instanceof Error ? error.message : error });
   }
 };
 
-export const postMessage = async (req: Request, res: Response) => {
+export const postMessages = async (req: Request, res: Response) => {
   try {
-    const { user, message } = req.body;
-    const newMessage = new messageModel({ user, message });
+    const { message, userId, groupId } = req.body;
+    const newMessage = new messageModel({ message, userId, groupId });
     await newMessage.save();
     res.status(201).json(newMessage);
   } catch (error) {
