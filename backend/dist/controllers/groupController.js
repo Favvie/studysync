@@ -58,9 +58,14 @@ export const deleteGroup = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(500).json({ success: false, msg: error instanceof Error ? error.message : 'An error occured' });
     }
 });
-export const addUserToGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+export const joinGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const { groupId, userId } = req.params;
+        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, msg: 'User ID not found' });
+        }
+        const { groupId } = req.params;
         const group = yield groupModel.findById({ _id: groupId });
         const user = yield userModel.findById({ _id: userId });
         if (!group || !user) {

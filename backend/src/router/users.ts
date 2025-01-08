@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { RequestHandler } from "express";
 import { signUp } from "../controllers/userController.js";
 import { signIn } from "../controllers/userController.js";
 import { signInAuth } from "../middleware/signInAuth.js";
@@ -18,11 +18,11 @@ const router = express.Router();
  * @param {NextFunction} [next] - Optional callback function to pass control to the next middleware function.
  * @returns {Promise<void> | void} - A Promise that resolves to void, or void if synchronous.
  */
-type RequestHandler = (
-  req: Request,
-  res: Response,
-  next?: NextFunction
-) => Promise<void> | void;
+// type RequestHandler = (
+//   req: Request,
+//   res: Response,
+//   next?: NextFunction
+// ) => Promise<void> | void;
 
 // Public route
 router.post("/signup", signUp as RequestHandler);

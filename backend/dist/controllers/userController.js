@@ -52,7 +52,7 @@ export const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* 
  */
 export const signIn = (req, res) => {
     if (!req.customData) {
-        return res.status(400).json({ success: false, message: 'Custom data is missing' });
+        return res.status(400).json({ success: false, msg: 'Custom data is missing' });
     }
     const { headers, success, message, token } = req.customData;
     res.cookie('refreshToken', headers.RefreshToken, {
@@ -79,14 +79,14 @@ export const refreshToken = (req, res) => __awaiter(void 0, void 0, void 0, func
         const privateRefreshKey = process.env.PRIVATE_REFRESH_KEY;
         // Validate refresh token
         if (!refreshToken) {
-            res.status(401).json({ success: false, error: 'Access denied' });
+            res.status(401).json({ success: false, msg: 'Access denied' });
             return;
         }
         // Verify and decode token
         const decoded = jwt.verify(refreshToken, privateRefreshKey);
         const userFound = yield userModel.findById(decoded.id);
         if (userFound === null) {
-            res.status(404).json({ success: false, error: 'userModel not found' });
+            res.status(404).json({ success: false, msg: 'userModel not found' });
             return;
         }
         // Generate new tokens
@@ -102,7 +102,7 @@ export const refreshToken = (req, res) => __awaiter(void 0, void 0, void 0, func
         }).json({ newAccessToken: token });
     }
     catch (error) {
-        res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'An error occured' });
+        res.status(400).json({ success: false, msg: error instanceof Error ? error.message : 'An error occured' });
     }
 });
 /**
@@ -157,6 +157,6 @@ export const deleteUserController = (req, res) => __awaiter(void 0, void 0, void
         res.status(200).json({ success: true, msg: "User deleted successfully" });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error instanceof Error ? error.message : error });
+        res.status(500).json({ success: false, msg: error instanceof Error ? error.message : error });
     }
 });

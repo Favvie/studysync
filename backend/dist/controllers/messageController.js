@@ -13,13 +13,13 @@ export const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const groupId = req.query.groupId;
         const messages = (yield messageModel.find({ groupId }));
         if (messages === null) {
-            res.status(404).json({ success: false, message: 'No messages found!' });
+            res.status(404).json({ success: false, msg: 'No messages found!' });
             return;
         }
         res.status(200).json(messages);
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error instanceof Error ? error.message : error });
+        res.status(500).json({ success: false, msg: error instanceof Error ? error.message : error });
     }
 });
 export const postMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -30,6 +30,6 @@ export const postMessages = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(201).json(newMessage);
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error instanceof Error ? error.message : error });
+        res.status(500).json({ success: false, msg: error instanceof Error ? error.message : error });
     }
 });

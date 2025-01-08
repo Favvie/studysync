@@ -51,9 +51,13 @@ export const deleteGroup = async (req: Request, res: Response) => {
     }
 }
 
-export const addUserToGroup = async (req: Request, res: Response) => {
+export const joinGroup = async (req: Request, res: Response) => {
     try {
-        const { groupId, userId } = req.params;
+        const userId = req.customData?.userId as string;
+        if (!userId) {
+            return res.status(400).json({ success: false, msg: 'User ID not found' });
+        }
+        const { groupId } = req.params;
         const group = await groupModel.findById({ _id: groupId });
         const user = await userModel.findById({ _id: userId });
         if (!group || !user) {
