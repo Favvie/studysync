@@ -26,9 +26,9 @@ app.use('/api/v1/groups', groupRoutes);
 app.use('/api/v1/messages', mesageRoutes);
 
 // Database connection
-const db = process.env.MONGODB_URI as string;
+const db = process.env.MONGODB_LOCALSERVER_URI as string;
 mongoose.connect(db).then(() => {
-    console.log("Connected to MongoDB database...");
+    console.log("Connected to Local MongoDB database server...");
 }).catch((err) => { console.log(err); });
 
 // Server configuration
