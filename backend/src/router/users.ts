@@ -1,4 +1,4 @@
-import express from "express";
+import express, { RequestHandler } from "express";
 import { signUp } from "../controllers/userController.js";
 import { signIn } from "../controllers/userController.js";
 import { signInAuth } from "../middleware/signInAuth.js";
@@ -9,6 +9,7 @@ import { patchUserController } from '../controllers/userController.js';
 import { refreshToken } from "../controllers/userController.js";
 import { authorizationMiddleware } from "../middleware/auth.js";
 const router = express.Router();
+
 // Make sure your handler functions follow this type pattern:
 /**
  * Represents a middleware function that handles HTTP requests in Express.js.
@@ -22,14 +23,22 @@ const router = express.Router();
 //   res: Response,
 //   next?: NextFunction
 // ) => Promise<void> | void;
+
 // Public route
-router.post("/signup", signUp);
-router.post("/signin", signInAuth, signIn);
-router.get('/refresh', refreshToken);
+router.post("/signup", signUp as RequestHandler);
+
+router.post("/signin", signInAuth as RequestHandler, signIn as RequestHandler);
+
+router.get('/refresh', refreshToken as RequestHandler);
 //Authorization Middleware for protected routes
-router.use(authorizationMiddleware);
-router.get('/users', getUserController);
-router.get('/users/:id', getUserByIdController);
-router.delete('/users/:id', deleteUserController);
-router.patch('/users/:id', patchUserController);
+router.use(authorizationMiddleware as RequestHandler);
+
+router.get('/users', getUserController as RequestHandler);
+
+router.get('/users/:id', getUserByIdController as RequestHandler);
+
+router.delete('/users/:id',deleteUserController as RequestHandler);
+
+router.patch('/users/:id',patchUserController as RequestHandler);
+
 export default router;
