@@ -7,7 +7,7 @@ export const getTasks = async (req: Request, res: Response) => {
         if(!userId) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
-        const tasks = await taskModel.find({userId });
+        const tasks = await taskModel.find({userId});
         res.status(200).json({success: true, msg: tasks});
     } catch (error) {
         res.status(404).json({ success: false, message: error instanceof Error ? error.message : error });
@@ -51,10 +51,48 @@ export const createTask = async (req: Request, res: Response) => {
     }
 }
 
-// export const updateTask = async(req: Request, res: Response) => {
-//     try {
-        
-//     } catch (error) {
-        
-//     }
-// }
+export const updateTask = async(req: Request, res: Response) => {
+    try {
+        const { title, description, status } = req.body;
+        const newTaskUpdate = {
+            ...(title && { title }),
+            ...(description && { description }),
+            ...(status && { status })
+        };
+        if (Object.keys(newTaskUpdate).length === 0) {
+            return res.status(400).json({ success: false, msg: "No valid fields to update" });
+        }
+        const userId = req.customData?.userId;
+        if(!userId) {
+            res.status(401).json({success: false, msg: "Unauthorized!"});
+        }
+        const taskId = req.params.taskId;
+        if(!taskId) {
+            res.status(400).json({success: false, msg: "Task Id is missing"});
+        }
+        const updatedTask = await taskModel.findOneAndUpdate({ userId, _id: taskId }, newTaskUpdate, { new: true });
+        res.status(200).json({success: true, msg: updatedTask});
+    } catch (error) {
+        res.status(400).json({success: false, msg: error instanceof Error? error.message: "An error occured"});
+    }
+}
+
+export const deleteTask = async(req: Request, res: Response) => {
+    try {
+        const userId = req.customData?.userId;
+        if(!userId) {
+            res.status(401).json({success: false, msg: "Unauthorized!"});
+        }
+        const taskId = req.params.taskId;
+        if(!taskId) {
+            res.status(400).json({success: false, msg: "Task Id is missing"});
+        }
+        const deletedTask = await taskModel.findOneAndDelete({ userId, _id: taskId });
+        if(!deletedTask) {
+            return res.status(400).json({success: false, msg: "No task found"});
+        }
+        res.status(200).json({success: true, msg: deletedTask});
+    } catch (error) {
+        res.status(400).json({success: false, msg: error instanceof Error? error.message: "An error occured"});
+    }
+}

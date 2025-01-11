@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import userRoutes from "./router/users.js";
 import groupRoutes from './router/groups.js';
 import mesageRoutes from './router/message.js';
+import taskRoutes from './router/task.js';
 import morgan from "morgan";
 import cors from "cors";
 // Load environment variables from .env file
@@ -20,8 +21,9 @@ app.use(cors()); // Enable CORS
 app.use('/api/v1/', userRoutes);
 app.use('/api/v1/groups', groupRoutes);
 app.use('/api/v1/messages', mesageRoutes);
+app.use('/api/v1/tasks', taskRoutes);
 // Database connection
-const db = process.env.MONGODB_LOCALSERVER_URI;
+const db = process.env.MONGODB_URI;
 mongoose.connect(db).then(() => {
     console.log("Connected to Local MongoDB database server...");
 }).catch((err) => { console.log(err); });

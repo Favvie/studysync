@@ -62,8 +62,47 @@ export const createTask = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.status(500).json({ success: false, message: error instanceof Error ? error.message : error });
     }
 });
-// export const updateTask = async(req: Request, res: Response) => {
-//     try {
-//     } catch (error) {
-//     }
-// }
+export const updateTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const { title, description, status } = req.body;
+        const newTaskUpdate = Object.assign(Object.assign(Object.assign({}, (title && { title })), (description && { description })), (status && { status }));
+        if (Object.keys(newTaskUpdate).length === 0) {
+            return res.status(400).json({ success: false, msg: "No valid fields to update" });
+        }
+        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        if (!userId) {
+            res.status(401).json({ success: false, msg: "Unauthorized!" });
+        }
+        const taskId = req.params.taskId;
+        if (!taskId) {
+            res.status(400).json({ success: false, msg: "Task Id is missing" });
+        }
+        const updatedTask = yield taskModel.findOneAndUpdate({ userId, _id: taskId }, newTaskUpdate, { new: true });
+        res.status(200).json({ success: true, msg: updatedTask });
+    }
+    catch (error) {
+        res.status(400).json({ success: false, msg: error instanceof Error ? error.message : "An error occured" });
+    }
+});
+export const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        if (!userId) {
+            res.status(401).json({ success: false, msg: "Unauthorized!" });
+        }
+        const taskId = req.params.taskId;
+        if (!taskId) {
+            res.status(400).json({ success: false, msg: "Task Id is missing" });
+        }
+        const deletedTask = yield taskModel.findOneAndDelete({ userId, _id: taskId });
+        if (!deletedTask) {
+            return res.status(400).json({ success: false, msg: "No task found" });
+        }
+        res.status(200).json({ success: true, msg: deletedTask });
+    }
+    catch (error) {
+        res.status(400).json({ success: false, msg: error instanceof Error ? error.message : "An error occured" });
+    }
+});
