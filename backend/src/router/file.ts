@@ -1,17 +1,28 @@
-import { Router, RequestHandler } from 'express';
+import { Router, RequestHandler } from "express";
 import {
     getFilesForGroup,
-    // getFileById,
+    getFileById,
     addNewFile,
-    // deleteFileById
-} from '../controllers/fileController.js';
-import { fileUploadMiddlware } from '../middleware/fileUpload.js';
+    deleteFileById,
+    updateFileMetadata,
+    downloadFileById,
+    searchFiles,
+} from "../controllers/fileController.js";
+import { fileUploadMiddlware } from "../middleware/fileUpload.js";
 
 const router = Router();
 
-router.get('/:groupId', getFilesForGroup as RequestHandler);
-// router.get('/:fileId', getFileById as RequestHandler);
-router.post('/:groupId', fileUploadMiddlware(), addNewFile as RequestHandler); //This route store files locally for now.
-// router.delete('/:fileId', deleteFileById as RequestHandler);
+router.get("/:groupId/groupfiles", getFilesForGroup as RequestHandler);
+router.post(
+    "/:groupId/upload",
+    fileUploadMiddlware(),
+    addNewFile as RequestHandler
+);
+router.get("/search", searchFiles as RequestHandler);
+router.get("/:fileId", getFileById as RequestHandler);
+router.get("/:fileId/download", downloadFileById as RequestHandler);
+router.delete("/:fileId/delete/", deleteFileById as RequestHandler);
+router.patch("/:fileId/updatefile", updateFileMetadata as RequestHandler);
+// router.post('/:fileId/share', shareFileById as RequestHandler); // TODO: Implement this if needed
 
 export default router;

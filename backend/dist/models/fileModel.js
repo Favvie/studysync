@@ -24,7 +24,7 @@ const fileSchema = new mongoose.Schema({
     groupId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",
-        required: true
-    }
+        required: true,
+    },
 }, { timestamps: true });
-export const fileModel = mongoose.model("FileData", fileSchema);
+export const fileModel = mongoose.model("Files", fileSchema);

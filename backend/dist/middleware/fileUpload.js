@@ -9,12 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import multer from "multer";
 import path from "path";
-import fs from 'fs';
+import fs from "fs";
 export const fileUploadMiddlware = () => {
     const storage = multer.diskStorage({
         destination: function (_req, _file, callback) {
             return __awaiter(this, void 0, void 0, function* () {
-                fs.mkdir('uploads', { recursive: true }, (err) => {
+                fs.mkdir("uploads", { recursive: true }, (err) => {
                     if (err) {
                         console.log(err);
                     }

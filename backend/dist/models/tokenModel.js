@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 /**
  * Schema definition for authentication tokens
  * @typedef {Object} TokenSchema
@@ -7,8 +7,13 @@ import { Schema, model } from 'mongoose';
  * @property {Date} createdAt - Timestamp of token creation, automatically expires after 12 hours (43200 seconds)
  */
 const tokenSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    userId: { type: Schema.Types.ObjectId, ref: "User" },
     token: { type: String, required: true },
-    createdAt: { type: Date, required: true, default: Date.now, expires: 43200 }
+    createdAt: {
+        type: Date,
+        required: true,
+        default: Date.now,
+        expires: 43200,
+    },
 });
-export const tokenModel = model('Token', tokenSchema);
+export const tokenModel = model("Token", tokenSchema);

@@ -3,10 +3,10 @@ import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import userRoutes from "./router/users.js";
-import groupRoutes from './router/groups.js';
-import mesageRoutes from './router/message.js';
-import taskRoutes from './router/task.js';
-import fileRoutes from './router/file.js';
+import groupRoutes from "./router/groups.js";
+import mesageRoutes from "./router/message.js";
+import taskRoutes from "./router/task.js";
+import fileRoutes from "./router/file.js";
 import morgan from "morgan";
 import cors from "cors";
 
@@ -23,17 +23,22 @@ app.use(morgan("dev")); // HTTP request logger
 app.use(cors()); // Enable CORS
 
 // Routes
-app.use('/api/v1/', userRoutes );
-app.use('/api/v1/groups', groupRoutes);
-app.use('/api/v1/messages', mesageRoutes);
-app.use('/api/v1/tasks', taskRoutes);
-app.use('/api/v1/files', fileRoutes);
+app.use("/api/v1/", userRoutes); //TODO: Implement Logout functionality
+app.use("/api/v1/groups", groupRoutes);
+app.use("/api/v1/messages", mesageRoutes);
+app.use("/api/v1/tasks", taskRoutes);
+app.use("/api/v1/files", fileRoutes);
 
 // Database connection
-const db = process.env.MONGODB_LOCALSERVER_URI as string;
-mongoose.connect(db).then(() => {
-    console.log("Connected to Local MongoDB database server...");
-}).catch((err) => { console.log(err); });
+const db = process.env.MONGODB_URI as string;
+mongoose
+    .connect(db)
+    .then(() => {
+        console.log("Connected to Local MongoDB database server...");
+    })
+    .catch((err) => {
+        console.log(err);
+    });
 
 // Server configuration
 const port = process.env.PORT;
