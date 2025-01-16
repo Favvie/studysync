@@ -1,20 +1,22 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const groupSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String, required: false },
-    usersId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    admins: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    visibility: { type: String, required: true, default: 'public' },
+    usersId: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    admins: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    visibility: { type: String, required: true, default: "public" },
     metadata: {
         memberCount: { type: Number, required: false },
         invitationCode: { type: String, required: false },
         maxMembers: { type: Number, required: false },
         groupAvatar: { type: String, required: false },
         rules: { type: String, required: false },
-        pinnedMessages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
-    }
+        pinnedMessages: [
+            { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
+        ],
+    },
 }, { timestamps: true });
-groupSchema.index({ name: 'text', description: 'text' });
+groupSchema.index({ name: "text", description: "text" });
 groupSchema.index({ ownerId: 1 });
-export const groupModel = mongoose.model('Group', groupSchema);
+export const groupModel = mongoose.model("Group", groupSchema);

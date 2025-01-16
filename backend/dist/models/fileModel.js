@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const fileMetaDataSchema = new mongoose.Schema({
+const fileSchema = new mongoose.Schema({
     fileName: {
         type: String,
         required: true,
@@ -16,10 +16,15 @@ const fileMetaDataSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    uploadedBy: {
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
-    }
+    },
+    groupId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Group",
+        required: true,
+    },
 }, { timestamps: true });
-export const fileModel = mongoose.model("FileMetaData", fileMetaDataSchema);
+export const fileModel = mongoose.model("Files", fileSchema);

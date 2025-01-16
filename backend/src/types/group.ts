@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document } from "mongoose";
 
 export interface IGroup extends Document {
     name: string;
@@ -6,7 +6,7 @@ export interface IGroup extends Document {
     usersId: string[];
     ownerId: string;
     admins: string[];
-    visibility: 'public' | 'private';
+    visibility: "public" | "private";
     metadata?: {
         memberCount?: number;
         invitationCode?: string;

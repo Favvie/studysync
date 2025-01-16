@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema({
     message: {
         type: String,
@@ -6,13 +6,13 @@ const messageSchema = new mongoose.Schema({
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "User",
         required: true,
     },
     groupId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Group',
+        ref: "Group",
         required: true,
     },
 }, { timestamps: true });
-export const messageModel = mongoose.model('Message', messageSchema);
+export const messageModel = mongoose.model("Message", messageSchema);

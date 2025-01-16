@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { hash } from 'bcrypt';
+import { hash } from "bcrypt";
 export const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     const salt = 10;
     return yield hash(password, salt);
