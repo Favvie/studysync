@@ -214,10 +214,15 @@ export const deleteUserController = (req, res) => __awaiter(void 0, void 0, void
  */
 export const logoutController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const refreshToken = req.cookies.split("%")[1];
-        yield tokenModel.findOneAndDelete({ token: refreshToken });
-        yield blacklistTokenModel.create({ token: req.headers.Authorization });
-        res.removeHeader("Authorization");
+        let refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.status(204);
+        }
+        refreshToken = refreshToken.toString().split(" ")[1];
+        yield tokenModel.findOneAndDelete({
+            token: refreshToken,
+        });
+        yield blacklistTokenModel.create({ token: refreshToken });
         res.clearCookie("refreshToken").json({
             success: true,
             msg: "User logged out successfully",

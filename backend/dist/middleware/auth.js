@@ -28,7 +28,8 @@ export const authorizationMiddleware = (req, res, next) => {
         }
     }
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const refreshToken = req.cookies.refreshToken;
+    if (!authHeader || !authHeader.startsWith("Bearer ") || !refreshToken) {
         res.status(401).json({ error: "No token provided" });
         return;
     }

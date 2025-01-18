@@ -9,15 +9,18 @@ import taskRoutes from "./router/task.js";
 import fileRoutes from "./router/file.js";
 import morgan from "morgan";
 import cors from "cors";
+import cookieparser from "cookie-parser";
 // Load environment variables from .env file
 dotenv.config();
 // Initialize Express application
 const app = express();
 // Middlewares
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(morgan("dev")); // HTTP request logger
-app.use(cors()); // Enable CORS
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+app.use(cors());
+app.use(cookieparser());
+app.use(express.static("public"));
 // Routes
 app.use("/api/v1/users", userRoutes); //TODO: Implement Logout functionality
 app.use("/api/v1/groups", groupRoutes);

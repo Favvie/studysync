@@ -6,6 +6,8 @@ tmux new-session -d -s dev
 # Split the window horizontally
 tmux split-window -h
 
+cd 'src/'
+
 # Send the tsc --watch command to the first pane
 tmux send-keys -t dev:0.0 "tsc --watch" C-m
 
