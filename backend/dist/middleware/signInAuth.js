@@ -78,6 +78,7 @@ export const signInAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, 
         const token = jwt.sign(payload, privateKey, { expiresIn: "1h" });
         const refreshToken = jwt.sign(payload, refreshkey, { expiresIn: "7d" });
         req.customData = {
+            payload,
             headers: {
                 RefreshToken: `Bearer ${refreshToken}`,
                 "Access-Control-Expose-Headers": "RefreshToken",

@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import { userModel } from "../models/userModel.js";
 import { hashPassword } from "../utils/hashPassword.js";
 import { tokenModel } from "../models/tokenModel.js";
+import { Payload } from "../types/user.js";
+import { blacklistTokenModel } from "../models/blacklistTokens.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
@@ -53,31 +55,45 @@ export const signUp = async (req: Request, res: Response) => {
  * @param req Request object with customData from middleware
  * @param res Response object
  */
-export const signIn = (req: Request, res: Response) => {
-    if (!req.customData) {
-        return res
-            .status(400)
-            .json({ success: false, msg: "Custom data is missing" });
+export const signIn = async (req: Request, res: Response) => {
+    try {
+        if (!req.customData) {
+            return res
+                .status(400)
+                .json({ success: false, msg: "Custom data is missing" });
+        }
+        const { payload, headers, success, message, token } =
+            req.customData as {
+                payload: Payload;
+                headers: {
+                    RefreshToken: string;
+                    "Access-Control-Expose-Headers": string;
+                };
+                success: boolean;
+                message: string;
+                token: string;
+            };
+        await tokenModel.create({
+            userId: payload.sub,
+            token: headers.RefreshToken,
+        });
+
+        res.cookie("refreshToken", headers.RefreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        }).json({
+            success,
+            message,
+            token,
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            msg: error instanceof Error ? error.message : "An error occured",
+        });
     }
-    const { headers, success, message, token } = req.customData as {
-        headers: {
-            RefreshToken: string;
-            "Access-Control-Expose-Headers": string;
-        };
-        success: boolean;
-        message: string;
-        token: string;
-    };
-    res.cookie("refreshToken", headers.RefreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    }).json({
-        success,
-        message,
-        token,
-    });
 };
 
 /**
@@ -205,6 +221,29 @@ export const deleteUserController = async (req: Request, res: Response) => {
         res.status(200).json({
             success: true,
             msg: "User deleted successfully",
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: error instanceof Error ? error.message : error,
+        });
+    }
+};
+
+/**
+ * Handle user logout
+ * @param req Request object
+ * @param res Response object
+ */
+export const logoutController = async (req: Request, res: Response) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        await tokenModel.findOneAndDelete({ token: refreshToken });
+        await blacklistTokenModel.create({ token: req.headers.Authorization });
+        res.removeHeader("Authorization");
+        res.clearCookie("refreshToken").json({
+            success: true,
+            msg: "User logged out successfully",
         });
     } catch (error) {
         res.status(500).json({

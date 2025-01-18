@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(morgan("dev")); // HTTP request logger
 app.use(cors()); // Enable CORS
 // Routes
-app.use("/api/v1/", userRoutes); //TODO: Implement Logout functionality
+app.use("/api/v1/users", userRoutes); //TODO: Implement Logout functionality
 app.use("/api/v1/groups", groupRoutes);
 app.use("/api/v1/messages", mesageRoutes);
 app.use("/api/v1/tasks", taskRoutes);

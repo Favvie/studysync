@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { userModel } from "../models/userModel.js";
 import { hashPassword } from "../utils/hashPassword.js";
 import { tokenModel } from "../models/tokenModel.js";
+import { blacklistTokenModel } from "../models/blacklistTokens.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
@@ -59,24 +60,36 @@ export const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* 
  * @param req Request object with customData from middleware
  * @param res Response object
  */
-export const signIn = (req, res) => {
-    if (!req.customData) {
-        return res
-            .status(400)
-            .json({ success: false, msg: "Custom data is missing" });
+export const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.customData) {
+            return res
+                .status(400)
+                .json({ success: false, msg: "Custom data is missing" });
+        }
+        const { payload, headers, success, message, token } = req.customData;
+        yield tokenModel.create({
+            userId: payload.sub,
+            token: headers.RefreshToken,
+        });
+        res.cookie("refreshToken", headers.RefreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        }).json({
+            success,
+            message,
+            token,
+        });
     }
-    const { headers, success, message, token } = req.customData;
-    res.cookie("refreshToken", headers.RefreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    }).json({
-        success,
-        message,
-        token,
-    });
-};
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            msg: error instanceof Error ? error.message : "An error occured",
+        });
+    }
+});
 /**
  * Handle token refresh
  * @param req Request object containing refresh token in header
@@ -185,6 +198,29 @@ export const deleteUserController = (req, res) => __awaiter(void 0, void 0, void
         res.status(200).json({
             success: true,
             msg: "User deleted successfully",
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: error instanceof Error ? error.message : error,
+        });
+    }
+});
+/**
+ * Handle user logout
+ * @param req Request object
+ * @param res Response object
+ */
+export const logoutController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const refreshToken = req.cookies.split("%")[1];
+        yield tokenModel.findOneAndDelete({ token: refreshToken });
+        yield blacklistTokenModel.create({ token: req.headers.Authorization });
+        res.removeHeader("Authorization");
+        res.clearCookie("refreshToken").json({
+            success: true,
+            msg: "User logged out successfully",
         });
     }
     catch (error) {
