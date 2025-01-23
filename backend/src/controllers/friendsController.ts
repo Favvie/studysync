@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { friendsModel } from "../models/friendsModel.js";
+import { redisClient } from "../app.js";
 
 export const getFriends = async (req: Request, res: Response) => {
     try {
@@ -9,8 +10,30 @@ export const getFriends = async (req: Request, res: Response) => {
                 .json({ success: false, msg: "Token is not available!" });
         }
         const userId = req.customData.userId;
-        const friends = await friendsModel.find({ userId });
-        res.status(200).json({ success: true, msg: friends });
+        const cachedFriends = await redisClient.get(`Friends:${userId}`);
+        if (cachedFriends) {
+            res.status(200).json({
+                success: true,
+                msg: JSON.parse(cachedFriends),
+            });
+        } else {
+            const friends = await friendsModel.find({ userId });
+            if (friends.length === 0) {
+                res.status(404).json({
+                    success: false,
+                    msg: "No friends found!",
+                });
+                return;
+            }
+            await redisClient.set(
+                `Friends:${userId}`,
+                JSON.stringify(friends),
+                {
+                    EX: 3600,
+                }
+            );
+            res.status(200).json({ success: true, msg: friends });
+        }
     } catch (error) {
         res.status(500).json({
             success: false,

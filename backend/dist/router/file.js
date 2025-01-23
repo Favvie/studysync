@@ -9,5 +9,4 @@ router.get("/:fileId", getFileById);
 router.get("/:fileId/download", downloadFileById);
 router.delete("/:fileId/delete/", deleteFileById);
 router.patch("/:fileId/updatefile", updateFileMetadata);
-// router.post('/:fileId/share', shareFileById as RequestHandler); // TODO: Implement this if needed
 export default router;

@@ -1,4 +1,3 @@
-// Import required dependencies
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -9,22 +8,20 @@ import taskRoutes from "./router/task.js";
 import fileRoutes from "./router/file.js";
 import morgan from "morgan";
 import cors from "cors";
-// Load environment variables from .env file
+import cookieparser from "cookie-parser";
 dotenv.config();
-// Initialize Express application
 const app = express();
-// Middlewares
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(morgan("dev")); // HTTP request logger
-app.use(cors()); // Enable CORS
-// Routes
-app.use("/api/v1/", userRoutes); //TODO: Implement Logout functionality
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+app.use(cors());
+app.use(cookieparser());
+app.use(express.static("public"));
+app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/groups", groupRoutes);
 app.use("/api/v1/messages", mesageRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/files", fileRoutes);
-// Database connection
 const db = process.env.MONGODB_URI;
 mongoose
     .connect(db)
@@ -34,10 +31,8 @@ mongoose
     .catch((err) => {
     console.log(err);
 });
-// Server configuration
 const port = process.env.PORT;
 const host = process.env.HOST;
-// Start the server
 app.listen(port, () => {
     console.log(`Connected to server on http://${host}:${port}`);
 });

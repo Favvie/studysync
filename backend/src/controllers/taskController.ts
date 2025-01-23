@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { taskModel } from "../models/taskModel.js";
+import { redisClient } from "../app.js";
 
 export const getTasks = async (req: Request, res: Response) => {
     try {
@@ -7,8 +8,24 @@ export const getTasks = async (req: Request, res: Response) => {
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
-        const tasks = await taskModel.find({ userId });
-        res.status(200).json({ success: true, msg: tasks });
+        const cachedData = await redisClient.get(`Tasks:${userId}`);
+        if (cachedData) {
+            res.status(200).json({
+                success: true,
+                msg: JSON.parse(cachedData),
+            });
+        } else {
+            const tasks = await taskModel.find({ userId });
+            if (tasks.length === 0) {
+                return res
+                    .status(404)
+                    .json({ success: false, msg: "No tasks found" });
+            }
+            await redisClient.set(`Tasks:${userId}`, JSON.stringify(tasks), {
+                EX: 3600,
+            });
+            res.status(200).json({ success: true, msg: tasks });
+        }
     } catch (error) {
         res.status(404).json({
             success: false,

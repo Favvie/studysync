@@ -9,6 +9,8 @@ import taskRoutes from "./router/task.js";
 import fileRoutes from "./router/file.js";
 import morgan from "morgan";
 import cors from "cors";
+import cookieparser from "cookie-parser";
+import { createClient } from "redis";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -17,13 +19,15 @@ dotenv.config();
 const app = express();
 
 // Middlewares
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(morgan("dev")); // HTTP request logger
-app.use(cors()); // Enable CORS
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+app.use(cors());
+app.use(cookieparser());
+app.use(express.static("public"));
 
 // Routes
-app.use("/api/v1/", userRoutes); //TODO: Implement Logout functionality
+app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/groups", groupRoutes);
 app.use("/api/v1/messages", mesageRoutes);
 app.use("/api/v1/tasks", taskRoutes);
@@ -39,6 +43,11 @@ mongoose
     .catch((err) => {
         console.log(err);
     });
+
+export const redisClient = createClient();
+redisClient.on("connect", () => console.log("Redis connected!"));
+redisClient.on("error", (err) => console.error("Redis error:", err));
+await redisClient.connect();
 
 // Server configuration
 const port = process.env.PORT;
