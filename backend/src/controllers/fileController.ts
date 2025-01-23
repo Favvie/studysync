@@ -3,7 +3,7 @@ import { fileModel } from "../models/fileModel.js";
 import { redisClient } from "../app.js";
 
 //TODO: Covert getting userId and checking if it is present into a util fucntion
-//TODO: COnvert other repetitive code into utils
+//TODO: Convert other repetitive code into utils
 
 export const getFilesForGroup = async (req: Request, res: Response) => {
     try {
