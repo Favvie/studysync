@@ -8,8 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { fileModel } from "../models/fileModel.js";
-//TODO: Covert getting userId and checking if it is present into a util fucntion
-//TODO: COnvert other repetitive code into utils
 export const getFilesForGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const groupId = req.params.groupId;
@@ -63,8 +61,7 @@ export const addNewFile = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return res.status(401).json({ message: "Unauthorized" });
         }
         const file = req.file;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { filename, size, mimetype, destination } = file; //fix-me: disable with eslint till fix is found for type error
+        const { filename, size, mimetype, destination } = file;
         const newFile = yield fileModel.create({
             fileName: filename,
             fileType: mimetype,
@@ -124,7 +121,7 @@ export const deleteFileById = (req, res) => __awaiter(void 0, void 0, void 0, fu
 export const updateFileMetadata = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const fileOwner = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId; //TODO: check variable anme and change later
+        const fileOwner = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
         if (!fileOwner) {
             return res.status(401).json({
                 success: false,
@@ -160,7 +157,7 @@ export const updateFileMetadata = (req, res) => __awaiter(void 0, void 0, void 0
         const updatedFile = yield fileModel.findOneAndUpdate({
             _id: fileId,
             userId: fileOwner,
-        }, fieldsToUpdate, { new: true }); //TODO: The function should should save name in format with (name-date) and update the fileUrl
+        }, fieldsToUpdate, { new: true });
         if (!updatedFile) {
             return res.status(400).json({
                 success: false,

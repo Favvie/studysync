@@ -64,7 +64,6 @@ export const addFriend = (req, res) => __awaiter(void 0, void 0, void 0, functio
         });
     }
 });
-//the below function is when the user accepts a friend request, what controller will i use for if the other user(user) wants to accept a friend request from me:
 export const changeFriendStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!req.customData || !req.customData.userId) {
@@ -75,12 +74,8 @@ export const changeFriendStatus = (req, res) => __awaiter(void 0, void 0, void 0
         const userId = req.customData.userId;
         const friendId = req.params.friendId;
         const status = req.body.status;
-        // Update the record for user -> friend
-        const userToFriend = yield friendsModel.findOneAndUpdate({ userId, friendId }, { userId, friendId, status }, { upsert: true, new: true } // Create if it doesn't exist
-        );
-        // Update the record for friend -> user
-        const friendToUser = yield friendsModel.findOneAndUpdate({ userId: friendId, friendId: userId }, { userId: friendId, friendId: userId, status }, { upsert: true, new: true } // Create if it doesn't exist
-        );
+        const userToFriend = yield friendsModel.findOneAndUpdate({ userId, friendId }, { userId, friendId, status }, { upsert: true, new: true });
+        const friendToUser = yield friendsModel.findOneAndUpdate({ userId: friendId, friendId: userId }, { userId: friendId, friendId: userId, status }, { upsert: true, new: true });
         res.status(200).json({
             success: true,
             msg: "Friend status changed for both users!",

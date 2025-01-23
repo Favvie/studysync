@@ -1,14 +1,18 @@
 import express, { RequestHandler } from "express";
-import { signUp } from "../controllers/userController.js";
-import { signIn } from "../controllers/userController.js";
 import { signInAuth } from "../middleware/signInAuth.js";
-import { getUserController } from "../controllers/userController.js";
-import { getUserByIdController } from "../controllers/userController.js";
-import { deleteUserController } from "../controllers/userController.js";
-import { patchUserController } from "../controllers/userController.js";
-import { refreshToken } from "../controllers/userController.js";
+import {
+    signUpController,
+    signInController,
+    getUsersController,
+    getUserByIdController,
+    deleteUserController,
+    patchUserController,
+    refreshTokenController,
+    logoutController,
+    forgotPasswordController,
+    resetPasswordController,
+} from "../controllers/userController.js";
 import { authorizationMiddleware } from "../middleware/auth.js";
-import { logoutController } from "../controllers/userController.js";
 const router = express.Router();
 
 // Make sure your handler functions follow this type pattern:
@@ -26,16 +30,30 @@ const router = express.Router();
 // ) => Promise<void> | void;
 
 // Public route
-router.post("/signup", signUp as RequestHandler);
+router.post("/signup", signUpController as RequestHandler);
 
-router.post("/signin", signInAuth as RequestHandler, signIn as RequestHandler);
+router.post(
+    "/signin",
+    signInAuth as RequestHandler,
+    signInController as RequestHandler
+);
 
-router.get("/refresh", refreshToken as RequestHandler);
+router.get("/auth/refresh", refreshTokenController as RequestHandler);
+
+router.post(
+    "/auth/forgot-password",
+    forgotPasswordController as RequestHandler
+);
+
+router.post(
+    "/auth/reset-password/:token",
+    resetPasswordController as RequestHandler
+);
 
 //Authorization Middleware for protected routes
 router.use(authorizationMiddleware as RequestHandler);
 
-router.get("/", getUserController as RequestHandler);
+router.get("/", getUsersController as RequestHandler);
 
 router.get("/logout", logoutController as RequestHandler);
 

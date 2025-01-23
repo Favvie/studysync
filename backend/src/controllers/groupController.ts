@@ -1,11 +1,30 @@
 import { Request, Response } from "express";
 import { userModel } from "../models/userModel.js";
 import { groupModel } from "../models/groupModel.js";
+import { redisClient } from "../app.js";
 
 export const getGroups = async (req: Request, res: Response) => {
     try {
-        const groups = await groupModel.find();
-        res.status(200).json({ success: true, msg: groups });
+        const cachedGroup = await redisClient.get("Groups");
+        if (cachedGroup) {
+            res.status(200).json({
+                success: true,
+                msg: JSON.parse(cachedGroup),
+            });
+        } else {
+            const groups = await groupModel.find();
+            if (groups.length === 0) {
+                res.status(404).json({
+                    success: false,
+                    msg: "No groups found!",
+                });
+                return;
+            }
+            await redisClient.set("Groups", JSON.stringify(groups), {
+                EX: 3600,
+            });
+            res.status(200).json({ success: true, msg: groups });
+        }
     } catch (error) {
         res.status(500).json({
             success: false,

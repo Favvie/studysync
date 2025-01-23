@@ -1,4 +1,3 @@
-// Not done yet
 export const getUserId = (req, res) => {
     var _a;
     const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;

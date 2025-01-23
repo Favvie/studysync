@@ -16,6 +16,5 @@ const friendsSchema = new mongoose.Schema({
         default: "pending",
     },
 }, { timestamps: true });
-// Ensure each userId-friendId pair is unique
 friendsSchema.index({ userId: 1, friendId: 1 }, { unique: true });
 export const friendsModel = mongoose.model("Friends", friendsSchema);

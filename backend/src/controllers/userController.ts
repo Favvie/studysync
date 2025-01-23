@@ -1,12 +1,16 @@
 // Import necessary dependencies from express and other modules
 import { Request, Response } from "express";
+import { redisClient } from "../app.js";
 import { userModel } from "../models/userModel.js";
 import { hashPassword } from "../utils/hashPassword.js";
 import { tokenModel } from "../models/tokenModel.js";
 import { Payload } from "../types/user.js";
 import { blacklistTokenModel } from "../models/blacklistTokens.js";
 import jwt from "jsonwebtoken";
+import { main } from "../utils/sendMailer.js";
+import crypto from "crypto";
 import dotenv from "dotenv";
+// import bcrypt from "bcrypt";
 dotenv.config();
 
 /**
@@ -14,7 +18,7 @@ dotenv.config();
  * @param req Request object containing email and password in body
  * @param res Response object
  */
-export const signUp = async (req: Request, res: Response) => {
+export const signUpController = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
         // Validate required fields
@@ -55,7 +59,7 @@ export const signUp = async (req: Request, res: Response) => {
  * @param req Request object with customData from middleware
  * @param res Response object
  */
-export const signIn = async (req: Request, res: Response) => {
+export const signInController = async (req: Request, res: Response) => {
     try {
         if (!req.customData) {
             return res
@@ -101,7 +105,7 @@ export const signIn = async (req: Request, res: Response) => {
  * @param req Request object containing refresh token in header
  * @param res Response object
  */
-export const refreshToken = async (req: Request, res: Response) => {
+export const refreshTokenController = async (req: Request, res: Response) => {
     try {
         const refreshToken = req.header("RefreshToken");
         const privateKey = process.env.PRIVATE_KEY as string;
@@ -190,9 +194,31 @@ export const patchUserController = async (req: Request, res: Response) => {
  * @param req Request object
  * @param res Response object
  */
-export const getUserController = async (req: Request, res: Response) => {
-    const users = await userModel.find();
-    res.json({ sucess: true, msg: users });
+export const getUsersController = async (req: Request, res: Response) => {
+    try {
+        const cachedData = await redisClient.get("users");
+        if (cachedData) {
+            res.status(200).json({
+                success: true,
+                msg: JSON.parse(cachedData),
+            });
+        } else {
+            const users = await userModel.find();
+            if (users.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    msg: "No users found",
+                });
+            }
+            await redisClient.set("users", JSON.stringify(users), { EX: 3600 });
+            res.status(200).json({ success: true, msg: users });
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: error instanceof Error ? error.message : error,
+        });
+    }
 };
 
 /**
@@ -249,6 +275,93 @@ export const logoutController = async (req: Request, res: Response) => {
         res.clearCookie("refreshToken").json({
             success: true,
             msg: "User logged out successfully",
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: error instanceof Error ? error.message : error,
+        });
+    }
+};
+
+export const forgotPasswordController = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                msg: "User not found",
+            });
+        }
+        let token = await tokenModel.findOne({ userId: user._id }); //edit this line when you implement successful deletion of token after successful use
+        if (token == null) {
+            token = await tokenModel.create({
+                userId: user._id,
+                token: crypto.randomBytes(32).toString("hex"),
+            });
+        }
+        const resetUrl = `${req.protocol}://${req.get("host")}/reset-password/${token.token}`;
+        const message = `Hello,
+
+        We received a request to reset your password. If you did not make this request, please disregard this email. Otherwise, follow this link to reset your password:
+        ${resetUrl}
+
+        Best regards,
+        Support Team`;
+        try {
+            await main(user.email, "Password Reset", message);
+            res.status(200).json({
+                success: true,
+                msg: "Token sent to email!",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                msg: `Email could not be sent, ${error instanceof Error ? error.message : error}`,
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: error instanceof Error ? error.message : error,
+        });
+    }
+};
+
+export const resetPasswordController = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+        const resetToken = await tokenModel.findOne({ token });
+        if (!resetToken) {
+            return res.status(404).json({
+                success: false,
+                msg: "Token not found",
+            });
+        }
+        const user = await userModel.findById(resetToken.userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                msg: "User not found",
+            });
+        }
+        // const passwordExists = await bcrypt.compare(password, user.password);
+        // if (!passwordExists) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         msg: "New password cannot be the same as the old password",
+        //     });
+        // } //TODO: Uncomment this when correct implementation is done
+        const hashedPassword = await hashPassword(password);
+        await userModel.findByIdAndUpdate(user._id, {
+            password: hashedPassword,
+        });
+        await tokenModel.findOneAndDelete({ token });
+        res.status(200).json({
+            success: true,
+            msg: "Password reset successfully",
         });
     } catch (error) {
         res.status(500).json({

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { fileModel } from "../models/fileModel.js";
+import { redisClient } from "../app.js";
 
 //TODO: Covert getting userId and checking if it is present into a util fucntion
 //TODO: COnvert other repetitive code into utils
@@ -10,8 +11,16 @@ export const getFilesForGroup = async (req: Request, res: Response) => {
         if (!groupId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
-        const files = await fileModel.find({ groupId });
-        res.status(200).json({ success: true, msg: files });
+        const cachedFiles = await redisClient.get(`files:${groupId}`);
+        if (cachedFiles) {
+            return res
+                .status(200)
+                .json({ success: true, msg: JSON.parse(cachedFiles) });
+        } else {
+            const files = await fileModel.find({ groupId });
+            await redisClient.set(`files:${groupId}`, JSON.stringify(files));
+            res.status(200).json({ success: true, msg: files });
+        }
     } catch (error) {
         res.status(500).json({
             success: false,
