@@ -1,21 +1,22 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { fileModel } from "../models/fileModel.js";
-export const getFilesForGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+import { redisClient } from "../app.js";
+export const getFilesForGroup = async (req, res) => {
     try {
         const groupId = req.params.groupId;
         if (!groupId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
-        const files = yield fileModel.find({ groupId });
-        res.status(200).json({ success: true, msg: files });
+        const cachedFiles = await redisClient.get(`files:${groupId}`);
+        if (cachedFiles) {
+            return res
+                .status(200)
+                .json({ success: true, msg: JSON.parse(cachedFiles) });
+        }
+        else {
+            const files = await fileModel.find({ groupId });
+            await redisClient.set(`files:${groupId}`, JSON.stringify(files));
+            res.status(200).json({ success: true, msg: files });
+        }
     }
     catch (error) {
         res.status(500).json({
@@ -23,8 +24,8 @@ export const getFilesForGroup = (req, res) => __awaiter(void 0, void 0, void 0, 
             msg: error instanceof Error ? error.message : "An error occurred",
         });
     }
-});
-export const getFileById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+export const getFileById = async (req, res) => {
     try {
         const { fileId } = req.params;
         if (!fileId) {
@@ -33,7 +34,7 @@ export const getFileById = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 msg: "FileId is missing",
             });
         }
-        const fileMetaData = yield fileModel.findById({ _id: fileId });
+        const fileMetaData = await fileModel.findById({ _id: fileId });
         if (!fileMetaData) {
             return res.status(400).json({
                 success: false,
@@ -51,18 +52,17 @@ export const getFileById = (req, res) => __awaiter(void 0, void 0, void 0, funct
             msg: error instanceof Error ? error.message : "An error occured",
         });
     }
-});
-export const addNewFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+};
+export const addNewFile = async (req, res) => {
     try {
-        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        const userId = req.customData?.userId;
         const groupId = req.params.groupId;
         if (!userId || !groupId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
         const file = req.file;
         const { filename, size, mimetype, destination } = file;
-        const newFile = yield fileModel.create({
+        const newFile = await fileModel.create({
             fileName: filename,
             fileType: mimetype,
             fileSize: size,
@@ -78,11 +78,10 @@ export const addNewFile = (req, res) => __awaiter(void 0, void 0, void 0, functi
             msg: error instanceof Error ? error.message : "An error occurred",
         });
     }
-});
-export const deleteFileById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+};
+export const deleteFileById = async (req, res) => {
     try {
-        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        const userId = req.customData?.userId;
         if (!userId) {
             return res.status(401).json({
                 success: false,
@@ -96,7 +95,7 @@ export const deleteFileById = (req, res) => __awaiter(void 0, void 0, void 0, fu
                 msg: "FileId is missing",
             });
         }
-        const deletedFile = yield fileModel.findOneAndDelete({
+        const deletedFile = await fileModel.findOneAndDelete({
             fileId,
             userId,
         });
@@ -117,11 +116,10 @@ export const deleteFileById = (req, res) => __awaiter(void 0, void 0, void 0, fu
             msg: error instanceof Error ? error.message : "Ann error occurred",
         });
     }
-});
-export const updateFileMetadata = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+};
+export const updateFileMetadata = async (req, res) => {
     try {
-        const fileOwner = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        const fileOwner = req.customData?.userId;
         if (!fileOwner) {
             return res.status(401).json({
                 success: false,
@@ -135,7 +133,7 @@ export const updateFileMetadata = (req, res) => __awaiter(void 0, void 0, void 0
                 msg: "FileId is missing",
             });
         }
-        const ifUserIsFileOwner = yield fileModel.findOne({
+        const ifUserIsFileOwner = await fileModel.findOne({
             _id: fileId,
             userId: fileOwner,
         });
@@ -147,14 +145,21 @@ export const updateFileMetadata = (req, res) => __awaiter(void 0, void 0, void 0
             });
         }
         const { fileName, fileType, fileSize, fileUrl, userId, groupId } = req.body;
-        const fieldsToUpdate = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, (fileName && { fileName })), (fileType && { fileType })), (fileSize && { fileSize })), (fileUrl && { fileUrl })), (userId && { userId })), (groupId && { groupId }));
+        const fieldsToUpdate = {
+            ...(fileName && { fileName }),
+            ...(fileType && { fileType }),
+            ...(fileSize && { fileSize }),
+            ...(fileUrl && { fileUrl }),
+            ...(userId && { userId }),
+            ...(groupId && { groupId }),
+        };
         if (Object.keys(fieldsToUpdate).length === 0) {
             return res.status(400).json({
                 success: false,
                 msg: "No valid fields to update",
             });
         }
-        const updatedFile = yield fileModel.findOneAndUpdate({
+        const updatedFile = await fileModel.findOneAndUpdate({
             _id: fileId,
             userId: fileOwner,
         }, fieldsToUpdate, { new: true });
@@ -175,8 +180,8 @@ export const updateFileMetadata = (req, res) => __awaiter(void 0, void 0, void 0
             msg: error instanceof Error ? error.message : "An error occurred",
         });
     }
-});
-export const downloadFileById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+export const downloadFileById = async (req, res) => {
     try {
         const { fileId } = req.params;
         if (!fileId) {
@@ -185,7 +190,7 @@ export const downloadFileById = (req, res) => __awaiter(void 0, void 0, void 0, 
                 msg: "FileId is missing",
             });
         }
-        const file = yield fileModel.findById({ _id: fileId });
+        const file = await fileModel.findById({ _id: fileId });
         if (!file) {
             return res.status(404).json({
                 success: false,
@@ -213,8 +218,8 @@ export const downloadFileById = (req, res) => __awaiter(void 0, void 0, void 0, 
             msg: error instanceof Error ? error.message : "An error occurred",
         });
     }
-});
-export const searchFiles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+export const searchFiles = async (req, res) => {
     try {
         const { searchquery } = req.query;
         const groupId = req.params.groupId;
@@ -224,7 +229,10 @@ export const searchFiles = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 msg: "Search query is missing",
             });
         }
-        const files = yield fileModel.find(Object.assign({ fileName: { $regex: searchquery, $options: "i" } }, (groupId && { groupId })));
+        const files = await fileModel.find({
+            fileName: { $regex: searchquery, $options: "i" },
+            ...(groupId && { groupId }),
+        });
         if (!files || files.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -242,4 +250,4 @@ export const searchFiles = (req, res) => __awaiter(void 0, void 0, void 0, funct
             msg: error instanceof Error ? error.message : "An error occurred",
         });
     }
-});
+};

@@ -102,11 +102,15 @@ export const updateTask = async (req: Request, res: Response) => {
         }
         const userId = req.customData?.userId;
         if (!userId) {
-            res.status(401).json({ success: false, msg: "Unauthorized!" });
+            return res
+                .status(401)
+                .json({ success: false, msg: "Unauthorized!" });
         }
         const taskId = req.params.taskId;
         if (!taskId) {
-            res.status(400).json({ success: false, msg: "Task Id is missing" });
+            return res
+                .status(400)
+                .json({ success: false, msg: "Task Id is missing" });
         }
         const updatedTask = await taskModel.findOneAndUpdate(
             { userId, _id: taskId },
@@ -126,11 +130,15 @@ export const deleteTask = async (req: Request, res: Response) => {
     try {
         const userId = req.customData?.userId;
         if (!userId) {
-            res.status(401).json({ success: false, msg: "Unauthorized!" });
+            return res
+                .status(401)
+                .json({ success: false, msg: "Unauthorized!" });
         }
         const taskId = req.params.taskId;
         if (!taskId) {
-            res.status(400).json({ success: false, msg: "Task Id is missing" });
+            return res
+                .status(400)
+                .json({ success: false, msg: "Task Id is missing" });
         }
         const deletedTask = await taskModel.findOneAndDelete({
             userId,

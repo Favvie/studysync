@@ -10,7 +10,6 @@ import jwt from "jsonwebtoken";
 import { main } from "../utils/sendMailer.js";
 import crypto from "crypto";
 import dotenv from "dotenv";
-// import bcrypt from "bcrypt";
 dotenv.config();
 
 /**
@@ -21,17 +20,9 @@ dotenv.config();
 export const signUpController = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
-        // Validate required fields
-        if (!email || !password) {
-            res.status(400).json({
-                success: false,
-                msg: "Email and password are required!",
-            });
-            return;
-        }
         // Check if email already exists
         const emailIsPresent = await userModel.findOne({ email });
-        if (emailIsPresent !== null) {
+        if (emailIsPresent != null) {
             res.status(400).json({
                 success: false,
                 msg: "Email is already used!",
@@ -48,7 +39,7 @@ export const signUpController = async (req: Request, res: Response) => {
         res.status(201).json(newUser);
     } catch (error) {
         res.status(400).json({
-            success: true,
+            success: false,
             error: error instanceof Error ? error.message : "An error occurred",
         });
     }
@@ -107,21 +98,22 @@ export const signInController = async (req: Request, res: Response) => {
  */
 export const refreshTokenController = async (req: Request, res: Response) => {
     try {
-        const refreshToken = req.header("RefreshToken");
+        let refreshToken = req.cookies.refreshToken;
+        refreshToken = refreshToken.toString().split(" ")[1];
+        console.log(refreshToken);
         const privateKey = process.env.PRIVATE_KEY as string;
         const privateRefreshKey = process.env.PRIVATE_REFRESH_KEY as string;
-
         // Validate refresh token
         if (!refreshToken) {
             res.status(401).json({ success: false, msg: "Access denied" });
             return;
         }
-
         // Verify and decode token
         const decoded = jwt.verify(refreshToken, privateRefreshKey) as {
-            id: string;
+            sub: string;
         };
-        const userFound = await userModel.findById(decoded.id);
+        console.log(decoded);
+        const userFound = await userModel.findById(decoded.sub);
         if (userFound === null) {
             res.status(404).json({
                 success: false,
@@ -175,9 +167,22 @@ export const patchUserController = async (req: Request, res: Response) => {
         req.body.password = hashedPassword;
     }
     try {
+        const { name, email, password } = req.body;
+        const paramsToUpdate = {
+            ...(name && { name }),
+            ...(email && { email }),
+            ...(password && { password }),
+        };
+        if (Object.keys(paramsToUpdate).length === 0) {
+            return res.status(400).json({
+                success: false,
+                msg: "No fields to update",
+            });
+        }
+        console.log(paramsToUpdate);
         const userUpdated = await userModel.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            paramsToUpdate,
             { new: true }
         );
         res.status(200).send(userUpdated);
@@ -227,8 +232,20 @@ export const getUsersController = async (req: Request, res: Response) => {
  * @param res Response object
  */
 export const getUserByIdController = async (req: Request, res: Response) => {
-    const userFound = await userModel.findById(req.params.id);
-    res.json({ sucess: true, msg: userFound });
+    try {
+        const userFound = await userModel.findById(req.params.id);
+        if (userFound == null) {
+            return res
+                .status(400)
+                .json({ success: false, msg: "No user found by this Id" });
+        }
+        res.json({ sucess: true, msg: userFound });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: error instanceof Error ? error.message : error,
+        });
+    }
 };
 
 /**
@@ -238,7 +255,9 @@ export const getUserByIdController = async (req: Request, res: Response) => {
  */
 export const deleteUserController = async (req: Request, res: Response) => {
     try {
-        const userDeleted = await userModel.findByIdAndDelete(req.params.id);
+        const userToBeDeletedId = req.params.id;
+        const userDeleted =
+            await userModel.findByIdAndDelete(userToBeDeletedId);
         if (!userDeleted) {
             return res
                 .status(404)
@@ -301,7 +320,7 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
                 token: crypto.randomBytes(32).toString("hex"),
             });
         }
-        const resetUrl = `${req.protocol}://${req.get("host")}/reset-password/${token.token}`;
+        const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/users/auth/reset-password/${token.token}`;
         const message = `Hello,
 
         We received a request to reset your password. If you did not make this request, please disregard this email. Otherwise, follow this link to reset your password:
@@ -313,7 +332,7 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
             await main(user.email, "Password Reset", message);
             res.status(200).json({
                 success: true,
-                msg: "Token sent to email!",
+                msg: `Reset password link sent to ${user.email}!`,
             });
         } catch (error) {
             return res.status(500).json({

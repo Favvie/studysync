@@ -13,6 +13,7 @@ import {
     resetPasswordController,
 } from "../controllers/userController.js";
 import { authorizationMiddleware } from "../middleware/auth.js";
+import { schemas, validateRequest } from "../middleware/validator.js";
 const router = express.Router();
 
 // Make sure your handler functions follow this type pattern:
@@ -30,10 +31,15 @@ const router = express.Router();
 // ) => Promise<void> | void;
 
 // Public route
-router.post("/signup", signUpController as RequestHandler);
+router.post(
+    "/auth/signup",
+    validateRequest(schemas.signup),
+    signUpController as RequestHandler
+);
 
 router.post(
-    "/signin",
+    "/auth/signin",
+    validateRequest(schemas.signin),
     signInAuth as RequestHandler,
     signInController as RequestHandler
 );
@@ -42,6 +48,7 @@ router.get("/auth/refresh", refreshTokenController as RequestHandler);
 
 router.post(
     "/auth/forgot-password",
+    validateRequest(schemas.forgotPassword),
     forgotPasswordController as RequestHandler
 );
 
@@ -61,6 +68,10 @@ router.get("/:id", getUserByIdController as RequestHandler);
 
 router.delete("/:id", deleteUserController as RequestHandler);
 
-router.patch("/:id", patchUserController as RequestHandler);
+router.patch(
+    "/:id",
+    validateRequest(schemas.patchUser),
+    patchUserController as RequestHandler
+);
 
 export default router;
