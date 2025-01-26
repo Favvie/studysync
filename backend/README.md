@@ -1,4 +1,4 @@
-<!-- # StudySync Backend API
+# StudySync Backend API
 
 <div align="center">
 
@@ -16,6 +16,7 @@
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+- [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
 - [Environment Variables](#environment-variables)
 - [Contributing](#contributing)
@@ -68,6 +69,14 @@ npm run build
 npm run dev
 ```
 
+## 🏃‍♂️ Running the Application
+
+To run the application, use the following command:
+```bash
+npm run dev
+```
+This will start the server on the specified port and host as defined in your environment variables.
+
 ## 📡 API Documentation
 
 ### Authentication Routes
@@ -113,6 +122,15 @@ GET    /api/v1/files/:fileId       - Get file by ID
 DELETE /api/v1/files/:fileId       - Delete file
 ```
 
+### Friend Routes
+```
+GET    /api/v1/friends       - Get all friends
+GET    /api/v1/friends/:id   - Get friend by ID
+POST   /api/v1/friends       - Add friend
+PATCH  /api/v1/friends/:id   - Update friend status
+DELETE /api/v1/friends/:id   - Delete friend
+```
+
 ## 🔐 Environment Variables
 
 ```env
@@ -122,6 +140,12 @@ MONGODB_URI=mongodb://localhost:27017/studysync
 PRIVATE_KEY=your_jwt_secret
 PRIVATE_REFRESH_KEY=your_refresh_token_secret
 ```
+
+- `PORT`: The port number on which the server will run.
+- `HOST`: The host address for the server.
+- `MONGODB_URI`: The URI for connecting to the MongoDB database.
+- `PRIVATE_KEY`: The secret key used for signing JWT tokens.
+- `PRIVATE_REFRESH_KEY`: The secret key used for signing refresh tokens.
 
 ## 🤝 Contributing
 
@@ -135,4 +159,4 @@ PRIVATE_REFRESH_KEY=your_refresh_token_secret
 
 <div align="center">
 Made with ❤️ by the StudySync Team
-</div> -->
+</div>
