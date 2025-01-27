@@ -6,7 +6,7 @@ import NewRoomModal from "@/src/components/NewRoomModal";
 
 const Sidebar = () => {
 	return (
-		<div className="bg-foreground text-background h-screen p-4">
+		<div className="bg-[#DA2877] text-background h-screen p-4">
 			<h1 className="text-xl font-bold text-center">STUDYSYNC</h1>
 
 			<div className="flex flex-col gap-10 mt-7 items-center">

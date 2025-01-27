@@ -15,12 +15,12 @@ const DashboardPage = () => {
 			<div className="py-10 space-x-4">
 				<Dialog>
 					<DialogTrigger asChild>
-						<Button>Create a Room</Button>
+						<Button className="bg-[#DA2877]">Create a Room</Button>
 					</DialogTrigger>
 					<NewRoomModal />
 				</Dialog>
 
-				<Button>Join a Room</Button>
+				<Button className="bg-[#DA2877]">Join a Room</Button>
 			</div>
 
 			<div className="grid grid-cols-4 gap-4 mt-10">
@@ -30,10 +30,22 @@ const DashboardPage = () => {
 					</DialogTrigger>
 					<NewRoomModal />
 				</Dialog>
-				<GroupCard />
-				<GroupCard />
-				<GroupCard />
-				<GroupCard />
+				<GroupCard
+					title="Physics"
+					participants={2}
+				/>
+				<GroupCard
+					title="ZK Study"
+					participants={4}
+				/>
+				<GroupCard
+					title="Math"
+					participants={3}
+				/>
+				<GroupCard
+					title="Art"
+					participants={5}
+				/>
 			</div>
 		</div>
 	);

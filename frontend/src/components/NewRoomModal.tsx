@@ -80,7 +80,11 @@ export default function NewRoomModal() {
 			</Card>
 
 			<DialogFooter>
-				<Button type="submit">Create Room</Button>
+				<Button
+					type="submit"
+					className="bg-[#DA2877]">
+					Create Room
+				</Button>
 			</DialogFooter>
 		</DialogContent>
 	);
