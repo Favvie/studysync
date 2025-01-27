@@ -20,6 +20,7 @@
 - [API Documentation](#api-documentation)
 - [Environment Variables](#environment-variables)
 - [Contributing](#contributing)
+- [Author](#author)
 
 ## 🎯 Overview
 
@@ -156,6 +157,10 @@ PRIVATE_REFRESH_KEY=your_refresh_token_secret
 3. Commit changes (`git commit -m 'Add AmazingFeature'`)
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+## 👤 Author
+
+- **Jesse Ekow Yeboah**
 
 ---
 
