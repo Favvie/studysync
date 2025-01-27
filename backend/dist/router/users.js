@@ -1,6 +1,6 @@
 import express from "express";
 import { signInAuth } from "../middleware/signInAuth.js";
-import { signUpController, signInController, getUserController, getUserByIdController, deleteUserController, patchUserController, refreshTokenController, logoutController, forgotPasswordController, resetPasswordController, } from "../controllers/userController.js";
+import { signUpController, signInController, getUsersController, getUserByIdController, deleteUserController, patchUserController, refreshTokenController, logoutController, forgotPasswordController, resetPasswordController, } from "../controllers/userController.js";
 import { authorizationMiddleware } from "../middleware/auth.js";
 const router = express.Router();
 router.post("/signup", signUpController);
@@ -9,7 +9,7 @@ router.get("/auth/refresh", refreshTokenController);
 router.post("/auth/forgot-password", forgotPasswordController);
 router.post("/auth/reset-password/:token", resetPasswordController);
 router.use(authorizationMiddleware);
-router.get("/", getUserController);
+router.get("/", getUsersController);
 router.get("/logout", logoutController);
 router.get("/:id", getUserByIdController);
 router.delete("/:id", deleteUserController);

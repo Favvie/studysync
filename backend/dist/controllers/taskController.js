@@ -1,22 +1,30 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { taskModel } from "../models/taskModel.js";
-export const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+import { redisClient } from "../app.js";
+export const getTasks = async (req, res) => {
     try {
-        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        const userId = req.customData?.userId;
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
-        const tasks = yield taskModel.find({ userId });
-        res.status(200).json({ success: true, msg: tasks });
+        const cachedData = await redisClient.get(`Tasks:${userId}`);
+        if (cachedData) {
+            res.status(200).json({
+                success: true,
+                msg: JSON.parse(cachedData),
+            });
+        }
+        else {
+            const tasks = await taskModel.find({ userId });
+            if (tasks.length === 0) {
+                return res
+                    .status(404)
+                    .json({ success: false, msg: "No tasks found" });
+            }
+            await redisClient.set(`Tasks:${userId}`, JSON.stringify(tasks), {
+                EX: 3600,
+            });
+            res.status(200).json({ success: true, msg: tasks });
+        }
     }
     catch (error) {
         res.status(404).json({
@@ -24,11 +32,10 @@ export const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function
             message: error instanceof Error ? error.message : error,
         });
     }
-});
-export const getTaskById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+};
+export const getTaskById = async (req, res) => {
     try {
-        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        const userId = req.customData?.userId;
         if (!userId) {
             return res
                 .status(401)
@@ -40,7 +47,7 @@ export const getTaskById = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 .status(400)
                 .json({ success: false, msg: "Task ID missing" });
         }
-        const task = yield taskModel.findOne({ _id: taskId, userId: userId });
+        const task = await taskModel.findOne({ _id: taskId, userId: userId });
         if (!task) {
             return res
                 .status(404)
@@ -54,11 +61,10 @@ export const getTaskById = (req, res) => __awaiter(void 0, void 0, void 0, funct
             message: error instanceof Error ? error.message : error,
         });
     }
-});
-export const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+};
+export const createTask = async (req, res) => {
     try {
-        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        const userId = req.customData?.userId;
         if (!userId) {
             return res
                 .status(401)
@@ -71,7 +77,7 @@ export const createTask = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 .json({ success: false, msg: "Missing required fields" });
         }
         const newTask = new taskModel({ userId, title, description, status });
-        const savedTask = yield newTask.save();
+        const savedTask = await newTask.save();
         res.status(201).json({ success: true, msg: savedTask });
     }
     catch (error) {
@@ -80,18 +86,21 @@ export const createTask = (req, res) => __awaiter(void 0, void 0, void 0, functi
             message: error instanceof Error ? error.message : error,
         });
     }
-});
-export const updateTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+};
+export const updateTask = async (req, res) => {
     try {
         const { title, description, status } = req.body;
-        const newTaskUpdate = Object.assign(Object.assign(Object.assign({}, (title && { title })), (description && { description })), (status && { status }));
+        const newTaskUpdate = {
+            ...(title && { title }),
+            ...(description && { description }),
+            ...(status && { status }),
+        };
         if (Object.keys(newTaskUpdate).length === 0) {
             return res
                 .status(400)
                 .json({ success: false, msg: "No valid fields to update" });
         }
-        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        const userId = req.customData?.userId;
         if (!userId) {
             res.status(401).json({ success: false, msg: "Unauthorized!" });
         }
@@ -99,7 +108,7 @@ export const updateTask = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (!taskId) {
             res.status(400).json({ success: false, msg: "Task Id is missing" });
         }
-        const updatedTask = yield taskModel.findOneAndUpdate({ userId, _id: taskId }, newTaskUpdate, { new: true });
+        const updatedTask = await taskModel.findOneAndUpdate({ userId, _id: taskId }, newTaskUpdate, { new: true });
         res.status(200).json({ success: true, msg: updatedTask });
     }
     catch (error) {
@@ -108,11 +117,10 @@ export const updateTask = (req, res) => __awaiter(void 0, void 0, void 0, functi
             msg: error instanceof Error ? error.message : "An error occured",
         });
     }
-});
-export const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+};
+export const deleteTask = async (req, res) => {
     try {
-        const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+        const userId = req.customData?.userId;
         if (!userId) {
             res.status(401).json({ success: false, msg: "Unauthorized!" });
         }
@@ -120,7 +128,7 @@ export const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (!taskId) {
             res.status(400).json({ success: false, msg: "Task Id is missing" });
         }
-        const deletedTask = yield taskModel.findOneAndDelete({
+        const deletedTask = await taskModel.findOneAndDelete({
             userId,
             _id: taskId,
         });
@@ -137,4 +145,4 @@ export const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, functi
             msg: error instanceof Error ? error.message : "An error occured",
         });
     }
-});
+};

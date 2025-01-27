@@ -1,17 +1,33 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+import { redisClient } from "../app.js";
 import { messageModel } from "../models/messageModel.js";
-export const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+export const getMessages = async (req, res) => {
     try {
         const groupId = req.query.groupId;
-        const messages = yield messageModel.find({ groupId });
+        if (!groupId) {
+            return res
+                .status(400)
+                .json({ success: false, msg: "No groupId gprovided" });
+        }
+        const cachedMessages = await redisClient.get(`Messages:${groupId}`);
+        if (cachedMessages) {
+            res.status(200).json({
+                success: true,
+                msg: JSON.parse(cachedMessages),
+            });
+        }
+        else {
+            const messages = await messageModel.find({ groupId });
+            if (messages.length === 0) {
+                return res
+                    .status(404)
+                    .json({ success: false, msg: "No messages found" });
+            }
+            await redisClient.set(`Messages:${groupId}`, JSON.stringify(messages), {
+                EX: 3600,
+            });
+            res.status(200).json({ success: true, msg: messages });
+        }
+        const messages = await messageModel.find({ groupId });
         if (messages === null) {
             res.status(404).json({ success: false, msg: "No messages found!" });
             return;
@@ -24,12 +40,12 @@ export const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, funct
             msg: error instanceof Error ? error.message : error,
         });
     }
-});
-export const postMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+export const postMessages = async (req, res) => {
     try {
         const { message, userId, groupId } = req.body;
         const newMessage = new messageModel({ message, userId, groupId });
-        yield newMessage.save();
+        await newMessage.save();
         res.status(201).json(newMessage);
     }
     catch (error) {
@@ -38,4 +54,4 @@ export const postMessages = (req, res) => __awaiter(void 0, void 0, void 0, func
             msg: error instanceof Error ? error.message : error,
         });
     }
-});
+};

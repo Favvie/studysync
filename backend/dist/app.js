@@ -9,6 +9,7 @@ import fileRoutes from "./router/file.js";
 import morgan from "morgan";
 import cors from "cors";
 import cookieparser from "cookie-parser";
+import { createClient } from "redis";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -31,6 +32,10 @@ mongoose
     .catch((err) => {
     console.log(err);
 });
+export const redisClient = createClient();
+redisClient.on("connect", () => console.log("Redis connected!"));
+redisClient.on("error", (err) => console.error("Redis error:", err));
+await redisClient.connect();
 const port = process.env.PORT;
 const host = process.env.HOST;
 app.listen(port, () => {
