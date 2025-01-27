@@ -42,7 +42,7 @@ export const schemas = {
             "string.empty": "Email is required",
         }),
         password: Joi.string().min(8).required().messages({
-            "string.min": "Password must be at least 6 characters long",
+            "string.min": "Password must be at least 8 characters long",
             "string.empty": "Password is required",
         }),
     }),
@@ -66,7 +66,7 @@ export const schemas = {
             "string.email": "Invalid email address",
         }),
         password: Joi.string().min(8).messages({
-            "string.min": "Password must be at least 6 characters long",
+            "string.min": "Password must be at least 8 characters long",
         }),
     }),
 
@@ -78,7 +78,7 @@ export const schemas = {
     }),
     resetPassword: Joi.object({
         password: Joi.string().min(8).required().messages({
-            "string.min": "Password must be at least 6 characters long",
+            "string.min": "Password must be at least 8 characters long",
             "string.empty": "Password is required",
         }),
     }),

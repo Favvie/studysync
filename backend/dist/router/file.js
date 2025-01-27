@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { getFilesForGroup, getFileById, addNewFile, deleteFileById, updateFileMetadata, downloadFileById, searchFiles, } from "../controllers/fileController.js";
 import { fileUploadMiddlware } from "../middleware/fileUpload.js";
+import { authorizationMiddleware } from "../middleware/auth.js";
 const router = Router();
+router.use(authorizationMiddleware);
 router.get("/:groupId/groupfiles", getFilesForGroup);
 router.post("/:groupId/upload", fileUploadMiddlware(), addNewFile);
 router.get("/search", searchFiles);
