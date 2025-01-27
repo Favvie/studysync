@@ -87,6 +87,19 @@ export const createTask = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * Updates a task with the provided fields in the request body.
+ *
+ * @param req - The request object containing the task update data.
+ * @param res - The response object to send the result of the update operation.
+ *
+ * @returns A JSON response indicating the success or failure of the update operation.
+ *
+ * @throws Will return a 400 status code if no valid fields are provided for update.
+ * @throws Will return a 401 status code if the user is unauthorized.
+ * @throws Will return a 400 status code if the task ID is missing.
+ * @throws Will return a 400 status code if an error occurs during the update operation.
+ */
 export const updateTask = async (req: Request, res: Response) => {
     try {
         const { title, description, status } = req.body;

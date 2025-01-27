@@ -14,6 +14,7 @@ import {
 } from "../controllers/userController.js";
 import { authorizationMiddleware } from "../middleware/auth.js";
 import { schemas, validateRequest } from "../middleware/validator.js";
+
 const router = express.Router();
 
 // Make sure your handler functions follow this type pattern:

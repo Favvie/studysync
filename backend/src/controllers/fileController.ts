@@ -122,6 +122,23 @@ export const deleteFileById = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * Updates the metadata of a file.
+ *
+ * @param req - The request object containing the file metadata to update.
+ * @param res - The response object to send the result of the update operation.
+ *
+ * @remarks
+ * - The function checks if the user is authorized to update the file metadata.
+ * - It validates the presence of `fileId` in the request parameters.
+ * - It verifies if the user is the owner of the file.
+ * - It updates the file metadata with the provided fields in the request body.
+ * - If no valid fields are provided for update, it returns a 400 status code.
+ * - If the file is successfully updated, it returns the updated file metadata.
+ * - If any error occurs during the process, it returns a 400 status code with the error message.
+ *
+ * @returns A JSON response with the status and message of the update operation.
+ */
 export const updateFileMetadata = async (req: Request, res: Response) => {
     try {
         const fileOwner = req.customData?.userId as string; //TODO: check variable anme and change later

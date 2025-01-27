@@ -23,6 +23,22 @@ import { JWTPayload } from "../types/user";
  *
  * @returns {void} - Does not return a value but calls `next()` to pass control to the next middleware
  */
+/**
+ * Middleware to handle authorization by verifying JWT tokens and checking for required environment variables.
+ *
+ * @param req - The request object from the client.
+ * @param res - The response object to send back to the client.
+ * @param next - The next middleware function in the stack.
+ *
+ * This middleware performs the following checks:
+ * 1. Ensures that the required environment variable `PRIVATE_KEY` is set.
+ * 2. Checks for the presence of an authorization header and a refresh token cookie.
+ * 3. Verifies the JWT token from the authorization header using the `PRIVATE_KEY`.
+ * 4. If the token is valid, it extracts the user ID from the token and attaches it to the request object.
+ * 5. If any check fails, it responds with an appropriate error message and status code.
+ *
+ * @throws {Error} If the JWT token verification fails or if any required data is missing.
+ */
 export const authorizationMiddleware = (
     req: Request,
     res: Response,

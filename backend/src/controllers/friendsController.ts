@@ -2,6 +2,18 @@ import { Request, Response } from "express";
 import { friendsModel } from "../models/friendsModel.js";
 import { redisClient } from "../app.js";
 
+/**
+ * Retrieves the list of friends for the authenticated user.
+ *
+ * @param req - The request object, which should contain customData with the userId.
+ * @param res - The response object used to send back the appropriate HTTP response.
+ *
+ * @returns A JSON response containing the list of friends or an error message.
+ *
+ * @throws 401 - If the token is not available in the request.
+ * @throws 404 - If no friends are found for the user.
+ * @throws 500 - If an internal server error occurs.
+ */
 export const getFriends = async (req: Request, res: Response) => {
     try {
         if (!req.customData || !req.customData.userId) {

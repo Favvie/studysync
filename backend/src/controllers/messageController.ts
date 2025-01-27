@@ -2,6 +2,33 @@ import { Request, Response } from "express";
 import { redisClient } from "../app.js";
 import { messageModel } from "../models/messageModel.js";
 
+/**
+ * Retrieves messages for a specific group.
+ *
+ * @param req - The request object containing the query parameters.
+ * @param res - The response object used to send the response.
+ *
+ * @returns A JSON response containing the messages or an error message.
+ *
+ * @remarks
+ * - If `groupId` is not provided in the query parameters, a 400 status code is returned.
+ * - If messages are found in the cache, they are returned with a 200 status code.
+ * - If no messages are found in the database, a 404 status code is returned.
+ * - If an error occurs during the process, a 500 status code is returned.
+ *
+ * @example
+ * // Example request
+ * GET /messages?groupId=123
+ *
+ * // Example response
+ * {
+ *   "success": true,
+ *   "msg": [
+ *     { "id": "1", "text": "Hello", "groupId": "123" },
+ *     { "id": "2", "text": "Hi", "groupId": "123" }
+ *   ]
+ * }
+ */
 export const getMessages = async (req: Request, res: Response) => {
     try {
         const groupId = req.query.groupId as string;

@@ -31,6 +31,20 @@ dotenv.config();
  *   // Handle successful authentication
  * });
  */
+/**
+ * Middleware to authenticate user sign-in.
+ *
+ * @param req - The request object containing user credentials.
+ * @param res - The response object to send the response.
+ * @param next - The next middleware function in the stack.
+ *
+ * @returns A JSON response with the authentication result or calls the next middleware.
+ *
+ * @throws Will return a 500 status if environment variables are not set.
+ * @throws Will return a 404 status if the user is not found.
+ * @throws Will return a 401 status if the password does not match.
+ * @throws Will return a 400 status if an error occurs during the process.
+ */
 export const signInAuth = async (
     req: Request,
     res: Response,

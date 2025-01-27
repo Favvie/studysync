@@ -34,6 +34,14 @@ app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/files", fileRoutes);
 
 // Database connection
+/**
+ * The MongoDB connection URI.
+ *
+ * This URI is retrieved from the environment variable `MONGODB_URI`.
+ * It is used to establish a connection to the MongoDB database.
+ *
+ * @constant {string} db - The MongoDB connection URI.
+ */
 const db = process.env.MONGODB_URI as string;
 mongoose
     .connect(db)

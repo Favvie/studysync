@@ -96,6 +96,21 @@ export const signInController = async (req: Request, res: Response) => {
  * @param req Request object containing refresh token in header
  * @param res Response object
  */
+/**
+ * Controller to handle refresh token requests.
+ *
+ * This controller verifies the provided refresh token, generates new access and refresh tokens,
+ * and sends them back to the client. It also saves the new refresh token in the database.
+ *
+ * @param req - The request object, expected to contain the refresh token in cookies.
+ * @param res - The response object, used to send back the new tokens or error messages.
+ *
+ * @returns A JSON response containing the new access token and sets a new refresh token in cookies.
+ *
+ * @throws Will return a 401 status if the refresh token is not provided.
+ * @throws Will return a 404 status if the user associated with the refresh token is not found.
+ * @throws Will return a 400 status for any other errors encountered during the process.
+ */
 export const refreshTokenController = async (req: Request, res: Response) => {
     try {
         let refreshToken = req.cookies.refreshToken;

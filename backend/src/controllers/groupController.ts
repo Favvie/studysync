@@ -3,6 +3,16 @@ import { userModel } from "../models/userModel.js";
 import { groupModel } from "../models/groupModel.js";
 import { redisClient } from "../app.js";
 
+/**
+ * Retrieves groups associated with the user making the request.
+ *
+ * @param req - The request object, expected to contain customData with userId.
+ * @param res - The response object used to send back the desired HTTP response.
+ *
+ * @returns A JSON response containing the groups associated with the user or an appropriate error message.
+ *
+ * @throws Will return a 500 status code with an error message if an exception occurs during the process.
+ */
 export const getGroups = async (req: Request, res: Response) => {
     try {
         const userId = req.customData?.userId as string;
