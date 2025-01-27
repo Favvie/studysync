@@ -1,6 +1,5 @@
 export const getUserId = (req, res) => {
-    var _a;
-    const userId = (_a = req.customData) === null || _a === void 0 ? void 0 : _a.userId;
+    const userId = req.customData?.userId;
     if (!userId) {
         return res
             .status(400)

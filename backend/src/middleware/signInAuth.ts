@@ -47,15 +47,6 @@ export const signInAuth = async (
             });
             return;
         }
-
-        if (!email || !password) {
-            res.status(400).json({
-                success: false,
-                error: "Please provide email and password",
-            });
-            return;
-        }
-
         const userFound: IUser | null = await userModel.findOne({ email });
         if (userFound === null) {
             res.status(404).json({

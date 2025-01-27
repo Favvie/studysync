@@ -8,7 +8,7 @@ export const getMessages = async (req: Request, res: Response) => {
         if (!groupId) {
             return res
                 .status(400)
-                .json({ success: false, msg: "No groupId gprovided" });
+                .json({ success: false, msg: "No groupId provided" });
         }
         const cachedMessages = await redisClient.get(`Messages:${groupId}`);
         if (cachedMessages) {
@@ -32,12 +32,6 @@ export const getMessages = async (req: Request, res: Response) => {
             );
             res.status(200).json({ success: true, msg: messages });
         }
-        const messages = await messageModel.find({ groupId });
-        if (messages === null) {
-            res.status(404).json({ success: false, msg: "No messages found!" });
-            return;
-        }
-        res.status(200).json(messages);
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -48,7 +42,8 @@ export const getMessages = async (req: Request, res: Response) => {
 
 export const postMessages = async (req: Request, res: Response) => {
     try {
-        const { message, userId, groupId } = req.body;
+        const userId = req.customData?.userId as string;
+        const { message, groupId } = req.body;
         const newMessage = new messageModel({ message, userId, groupId });
         await newMessage.save();
         res.status(201).json(newMessage);

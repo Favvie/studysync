@@ -9,8 +9,11 @@ import {
     searchFiles,
 } from "../controllers/fileController.js";
 import { fileUploadMiddlware } from "../middleware/fileUpload.js";
+import { authorizationMiddleware } from "../middleware/auth.js";
 
 const router = Router();
+
+router.use(authorizationMiddleware as RequestHandler);
 
 router.get("/:groupId/groupfiles", getFilesForGroup as RequestHandler);
 router.post(
