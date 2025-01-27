@@ -15,13 +15,6 @@ export const signInAuth = async (req, res, next) => {
             });
             return;
         }
-        if (!email || !password) {
-            res.status(400).json({
-                success: false,
-                error: "Please provide email and password",
-            });
-            return;
-        }
         const userFound = await userModel.findOne({ email });
         if (userFound === null) {
             res.status(404).json({
@@ -54,8 +47,7 @@ export const signInAuth = async (req, res, next) => {
             token,
         };
         next();
-    }
-    catch (error) {
+    } catch (error) {
         res.status(400).json({
             success: false,
             error: error instanceof Error ? error.message : "An error occured",

@@ -11,15 +11,8 @@ dotenv.config();
 export const signUpController = async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password) {
-            res.status(400).json({
-                success: false,
-                msg: "Email and password are required!",
-            });
-            return;
-        }
         const emailIsPresent = await userModel.findOne({ email });
-        if (emailIsPresent !== null) {
+        if (emailIsPresent != null) {
             res.status(400).json({
                 success: false,
                 msg: "Email is already used!",
@@ -33,10 +26,9 @@ export const signUpController = async (req, res) => {
         });
         await newUser.save();
         res.status(201).json(newUser);
-    }
-    catch (error) {
+    } catch (error) {
         res.status(400).json({
-            success: true,
+            success: false,
             error: error instanceof Error ? error.message : "An error occurred",
         });
     }
@@ -63,8 +55,7 @@ export const signInController = async (req, res) => {
             message,
             token,
         });
-    }
-    catch (error) {
+    } catch (error) {
         res.status(400).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -73,7 +64,9 @@ export const signInController = async (req, res) => {
 };
 export const refreshTokenController = async (req, res) => {
     try {
-        const refreshToken = req.header("RefreshToken");
+        let refreshToken = req.cookies.refreshToken;
+        refreshToken = refreshToken.toString().split(" ")[1];
+        console.log(refreshToken);
         const privateKey = process.env.PRIVATE_KEY;
         const privateRefreshKey = process.env.PRIVATE_REFRESH_KEY;
         if (!refreshToken) {
@@ -81,7 +74,8 @@ export const refreshTokenController = async (req, res) => {
             return;
         }
         const decoded = jwt.verify(refreshToken, privateRefreshKey);
-        const userFound = await userModel.findById(decoded.id);
+        console.log(decoded);
+        const userFound = await userModel.findById(decoded.sub);
         if (userFound === null) {
             res.status(404).json({
                 success: false,
@@ -92,9 +86,13 @@ export const refreshTokenController = async (req, res) => {
         const token = jwt.sign({ id: userFound._id }, privateKey, {
             expiresIn: "1h",
         });
-        const newRefreshToken = jwt.sign({ id: userFound._id }, privateRefreshKey, {
-            expiresIn: "7d",
-        });
+        const newRefreshToken = jwt.sign(
+            { id: userFound._id },
+            privateRefreshKey,
+            {
+                expiresIn: "7d",
+            }
+        );
         await tokenModel.create({
             userId: userFound._id,
             token: newRefreshToken,
@@ -105,8 +103,7 @@ export const refreshTokenController = async (req, res) => {
             sameSite: "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         }).json({ newAccessToken: token });
-    }
-    catch (error) {
+    } catch (error) {
         res.status(400).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -120,10 +117,26 @@ export const patchUserController = async (req, res) => {
         req.body.password = hashedPassword;
     }
     try {
-        const userUpdated = await userModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { name, email, password } = req.body;
+        const paramsToUpdate = {
+            ...(name && { name }),
+            ...(email && { email }),
+            ...(password && { password }),
+        };
+        if (Object.keys(paramsToUpdate).length === 0) {
+            return res.status(400).json({
+                success: false,
+                msg: "No fields to update",
+            });
+        }
+        console.log(paramsToUpdate);
+        const userUpdated = await userModel.findByIdAndUpdate(
+            req.params.id,
+            paramsToUpdate,
+            { new: true }
+        );
         res.status(200).send(userUpdated);
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -138,8 +151,7 @@ export const getUsersController = async (req, res) => {
                 success: true,
                 msg: JSON.parse(cachedData),
             });
-        }
-        else {
+        } else {
             const users = await userModel.find();
             if (users.length === 0) {
                 return res.status(404).json({
@@ -150,8 +162,33 @@ export const getUsersController = async (req, res) => {
             await redisClient.set("users", JSON.stringify(users), { EX: 3600 });
             res.status(200).json({ success: true, msg: users });
         }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: error instanceof Error ? error.message : error,
+        });
     }
-    catch (error) {
+};
+export const getUsersController = async (req, res) => {
+    try {
+        const cachedData = await redisClient.get("users");
+        if (cachedData) {
+            res.status(200).json({
+                success: true,
+                msg: JSON.parse(cachedData),
+            });
+        } else {
+            const users = await userModel.find();
+            if (users.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    msg: "No users found",
+                });
+            }
+            await redisClient.set("users", JSON.stringify(users), { EX: 3600 });
+            res.status(200).json({ success: true, msg: users });
+        }
+    } catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -159,12 +196,26 @@ export const getUsersController = async (req, res) => {
     }
 };
 export const getUserByIdController = async (req, res) => {
-    const userFound = await userModel.findById(req.params.id);
-    res.json({ sucess: true, msg: userFound });
+    try {
+        const userFound = await userModel.findById(req.params.id);
+        if (userFound == null) {
+            return res
+                .status(400)
+                .json({ success: false, msg: "No user found by this Id" });
+        }
+        res.json({ sucess: true, msg: userFound });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: error instanceof Error ? error.message : error,
+        });
+    }
 };
 export const deleteUserController = async (req, res) => {
     try {
-        const userDeleted = await userModel.findByIdAndDelete(req.params.id);
+        const userToBeDeletedId = req.params.id;
+        const userDeleted =
+            await userModel.findByIdAndDelete(userToBeDeletedId);
         if (!userDeleted) {
             return res
                 .status(404)
@@ -174,8 +225,7 @@ export const deleteUserController = async (req, res) => {
             success: true,
             msg: "User deleted successfully",
         });
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -197,8 +247,7 @@ export const logoutController = async (req, res) => {
             success: true,
             msg: "User logged out successfully",
         });
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -222,7 +271,7 @@ export const forgotPasswordController = async (req, res) => {
                 token: crypto.randomBytes(32).toString("hex"),
             });
         }
-        const resetUrl = `${req.protocol}://${req.get("host")}/reset-password/${token.token}`;
+        const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/users/auth/reset-password/${token.token}`;
         const message = `Hello,
 
         We received a request to reset your password. If you did not make this request, please disregard this email. Otherwise, follow this link to reset your password:
@@ -234,17 +283,15 @@ export const forgotPasswordController = async (req, res) => {
             await main(user.email, "Password Reset", message);
             res.status(200).json({
                 success: true,
-                msg: "Token sent to email!",
+                msg: `Reset password link sent to ${user.email}!`,
             });
-        }
-        catch (error) {
+        } catch (error) {
             return res.status(500).json({
                 success: false,
                 msg: `Email could not be sent, ${error instanceof Error ? error.message : error}`,
             });
         }
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -278,8 +325,7 @@ export const resetPasswordController = async (req, res) => {
             success: true,
             msg: "Password reset successfully",
         });
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
