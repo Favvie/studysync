@@ -76,7 +76,7 @@ StudySync's backend provides a robust API for managing study groups, tasks, mess
     ```
 
 ## 📡 API Documentation
-
+https://documenter.getpostman.com/view/37874320/2sAYQggoMC
 ### Authentication Routes
 
 ```
