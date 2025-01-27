@@ -15,7 +15,8 @@ export const getGroups = async (req, res) => {
                 success: true,
                 msg: JSON.parse(cachedGroup),
             });
-        } else {
+        }
+        else {
             const groups = await groupModel.find({
                 $or: [{ usersId: userId }, { admins: userId }],
             });
@@ -31,7 +32,8 @@ export const getGroups = async (req, res) => {
             });
             res.status(200).json({ success: true, msg: groups });
         }
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occurred",
@@ -53,7 +55,8 @@ export const getGroup = async (req, res) => {
             });
         }
         res.status(200).json({ success: true, msg: group });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -78,7 +81,8 @@ export const createGroup = async (req, res) => {
             usersId: [userId],
         });
         res.status(201).json({ success: true, msg: group });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -88,13 +92,10 @@ export const createGroup = async (req, res) => {
 export const updateGroup = async (req, res) => {
     try {
         const { groupId } = req.params;
-        const group = await groupModel.findByIdAndUpdate(
-            { _id: groupId },
-            req.body,
-            { new: true }
-        );
+        const group = await groupModel.findByIdAndUpdate({ _id: groupId }, req.body, { new: true });
         res.status(200).json({ success: true, msg: group });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -121,7 +122,8 @@ export const deleteGroup = async (req, res) => {
             success: true,
             msg: "Group deleted successfully",
         });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -154,7 +156,8 @@ export const joinGroup = async (req, res) => {
             await group.save();
         }
         res.status(200).json({ success: true, msg: group });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -173,7 +176,8 @@ export const removeUserFromGroup = async (req, res) => {
         group.usersId = group.usersId.filter((id) => id !== userId);
         await group.save();
         res.status(200).json({ success: true, msg: group });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",

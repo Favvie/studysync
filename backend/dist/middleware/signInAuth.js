@@ -47,7 +47,8 @@ export const signInAuth = async (req, res, next) => {
             token,
         };
         next();
-    } catch (error) {
+    }
+    catch (error) {
         res.status(400).json({
             success: false,
             error: error instanceof Error ? error.message : "An error occured",

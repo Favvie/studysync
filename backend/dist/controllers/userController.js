@@ -26,7 +26,8 @@ export const signUpController = async (req, res) => {
         });
         await newUser.save();
         res.status(201).json(newUser);
-    } catch (error) {
+    }
+    catch (error) {
         res.status(400).json({
             success: false,
             error: error instanceof Error ? error.message : "An error occurred",
@@ -55,7 +56,8 @@ export const signInController = async (req, res) => {
             message,
             token,
         });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(400).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -86,13 +88,9 @@ export const refreshTokenController = async (req, res) => {
         const token = jwt.sign({ id: userFound._id }, privateKey, {
             expiresIn: "1h",
         });
-        const newRefreshToken = jwt.sign(
-            { id: userFound._id },
-            privateRefreshKey,
-            {
-                expiresIn: "7d",
-            }
-        );
+        const newRefreshToken = jwt.sign({ id: userFound._id }, privateRefreshKey, {
+            expiresIn: "7d",
+        });
         await tokenModel.create({
             userId: userFound._id,
             token: newRefreshToken,
@@ -103,7 +101,8 @@ export const refreshTokenController = async (req, res) => {
             sameSite: "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         }).json({ newAccessToken: token });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(400).json({
             success: false,
             msg: error instanceof Error ? error.message : "An error occured",
@@ -130,13 +129,10 @@ export const patchUserController = async (req, res) => {
             });
         }
         console.log(paramsToUpdate);
-        const userUpdated = await userModel.findByIdAndUpdate(
-            req.params.id,
-            paramsToUpdate,
-            { new: true }
-        );
+        const userUpdated = await userModel.findByIdAndUpdate(req.params.id, paramsToUpdate, { new: true });
         res.status(200).send(userUpdated);
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -151,7 +147,8 @@ export const getUsersController = async (req, res) => {
                 success: true,
                 msg: JSON.parse(cachedData),
             });
-        } else {
+        }
+        else {
             const users = await userModel.find();
             if (users.length === 0) {
                 return res.status(404).json({
@@ -162,33 +159,8 @@ export const getUsersController = async (req, res) => {
             await redisClient.set("users", JSON.stringify(users), { EX: 3600 });
             res.status(200).json({ success: true, msg: users });
         }
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            msg: error instanceof Error ? error.message : error,
-        });
     }
-};
-export const getUsersController = async (req, res) => {
-    try {
-        const cachedData = await redisClient.get("users");
-        if (cachedData) {
-            res.status(200).json({
-                success: true,
-                msg: JSON.parse(cachedData),
-            });
-        } else {
-            const users = await userModel.find();
-            if (users.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    msg: "No users found",
-                });
-            }
-            await redisClient.set("users", JSON.stringify(users), { EX: 3600 });
-            res.status(200).json({ success: true, msg: users });
-        }
-    } catch (error) {
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -204,7 +176,8 @@ export const getUserByIdController = async (req, res) => {
                 .json({ success: false, msg: "No user found by this Id" });
         }
         res.json({ sucess: true, msg: userFound });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -214,8 +187,7 @@ export const getUserByIdController = async (req, res) => {
 export const deleteUserController = async (req, res) => {
     try {
         const userToBeDeletedId = req.params.id;
-        const userDeleted =
-            await userModel.findByIdAndDelete(userToBeDeletedId);
+        const userDeleted = await userModel.findByIdAndDelete(userToBeDeletedId);
         if (!userDeleted) {
             return res
                 .status(404)
@@ -225,7 +197,8 @@ export const deleteUserController = async (req, res) => {
             success: true,
             msg: "User deleted successfully",
         });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -247,7 +220,8 @@ export const logoutController = async (req, res) => {
             success: true,
             msg: "User logged out successfully",
         });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -285,13 +259,15 @@ export const forgotPasswordController = async (req, res) => {
                 success: true,
                 msg: `Reset password link sent to ${user.email}!`,
             });
-        } catch (error) {
+        }
+        catch (error) {
             return res.status(500).json({
                 success: false,
                 msg: `Email could not be sent, ${error instanceof Error ? error.message : error}`,
             });
         }
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
@@ -325,7 +301,8 @@ export const resetPasswordController = async (req, res) => {
             success: true,
             msg: "Password reset successfully",
         });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             msg: error instanceof Error ? error.message : error,
