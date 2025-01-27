@@ -1,18 +1,9 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import jwt from "jsonwebtoken";
 import { userModel } from "../models/userModel.js";
 import { compare } from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
-export const signInAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+export const signInAuth = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         const privateKey = process.env.PRIVATE_KEY;
@@ -31,7 +22,7 @@ export const signInAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             });
             return;
         }
-        const userFound = yield userModel.findOne({ email });
+        const userFound = await userModel.findOne({ email });
         if (userFound === null) {
             res.status(404).json({
                 success: false,
@@ -39,7 +30,7 @@ export const signInAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             });
             return;
         }
-        const isMatch = yield compare(password, userFound.password);
+        const isMatch = await compare(password, userFound.password);
         if (isMatch === false) {
             res.status(401).json({
                 success: false,
@@ -70,4 +61,4 @@ export const signInAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             error: error instanceof Error ? error.message : "An error occured",
         });
     }
-});
+};
