@@ -15,17 +15,11 @@ export default function Home() {
 							<br />
 							WE STUDY STRONGER
 						</h1>
-						<p className="mt-6 text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed">
-							StudySync transforms your independent study sessions into a shared
-							learning experience. Connect with fellow students worldwide, stay
-							motivated, and achieve your academic goals together. Create or join
-							virtual study rooms and make every study session count.
-						</p>
+						<p className="mt-6 text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed">StudySync transforms your independent study sessions into a shared learning experience. Connect with fellow students worldwide, stay motivated, and achieve your academic goals together. Create or join virtual study rooms and make every study session count.</p>
 						<div className="mt-8 flex flex-wrap gap-4">
 							<a
-								href="#"
-								className="bg-pink-500 text-white py-3 px-6 rounded-lg text-sm font-semibold hover:bg-pink-600 transition"
-							>
+								href="/dashboard"
+								className="bg-pink-500 text-white py-3 px-6 rounded-lg text-sm font-semibold hover:bg-pink-600 transition">
 								Join A Room Now
 							</a>
 						</div>
@@ -48,8 +42,7 @@ export default function Home() {
 									className="w-6 h-6 mx-auto animate-bounce"
 									fill="none"
 									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
+									viewBox="0 0 24 24">
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"
@@ -66,27 +59,16 @@ export default function Home() {
 			{/* Second Section */}
 			<section className="relative min-h-screen bg-gray-900">
 				<div className="absolute inset-0 z-10 px-6 py-16 md:px-16 lg:px-32">
-					<h2 className="text-2xl md:text-3xl font-extrabold text-white">
-						How It Works
-					</h2>
+					<h2 className="text-2xl md:text-3xl font-extrabold text-white">How It Works</h2>
 					<div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 bg-black bg-opacity-50 p-8 rounded-lg">
 						{[...Array(4)].map((_, index) => (
-							<div className="flex gap-4 items-center" key={index}>
-								<div className="bg-pink-500 w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl">
-									{index + 1}
-								</div>
+							<div
+								className="flex gap-4 items-center"
+								key={index}>
+								<div className="bg-pink-500 w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl">{index + 1}</div>
 								<div>
-									<h3 className="text-lg font-semibold text-white">
-										{["Create a Room", "Set Goals", "Study Together", "Achieve Goals"][index]}
-									</h3>
-									<p className="text-gray-300">
-										{[
-											"Create a virtual study room and invite friends or join an existing room.",
-											"Set study goals, track your progress, and motivate each other to stay on track.",
-											"Study together in real-time, share resources, and help each other out.",
-											"Stay motivated, complete tasks, and achieve your academic goals together.",
-										][index]}
-									</p>
+									<h3 className="text-lg font-semibold text-white">{["Create a Room", "Set Goals", "Study Together", "Achieve Goals"][index]}</h3>
+									<p className="text-gray-300">{["Create a virtual study room and invite friends or join an existing room.", "Set study goals, track your progress, and motivate each other to stay on track.", "Study together in real-time, share resources, and help each other out.", "Stay motivated, complete tasks, and achieve your academic goals together."][index]}</p>
 								</div>
 							</div>
 						))}
